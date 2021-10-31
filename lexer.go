@@ -72,7 +72,7 @@ func lexLine(file string, linePos int, line string) []token {
 func lex(file string, fileLines []string) []token {
 	result := []token{}
 	for idx, line := range fileLines {
-		for _, tk := range lexLine(file, idx, line) {
+		for _, tk := range lexLine(file, idx+1, line) {
 			result = append(result, tk)
 		}
 	}

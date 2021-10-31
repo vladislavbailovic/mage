@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"bufio"
+	"errors"
 )
 
 type parser struct {
@@ -14,14 +15,15 @@ type parser struct {
 type taskDefinition struct {
 	pos sourcePosition
 	name string
+	normalizedName string
 	dependencies []string
 	commands []string
 }
 
-func loadFile(fpath string) []string {
+func loadFile(fpath string) ([]string, error) {
 	fp, err := os.Open(fpath)
 	if err != nil {
-		panic("Error reading file: " + fpath)
+		return nil, errors.New("Error reading file: " + fpath)
 	}
 	defer fp.Close()
 
@@ -30,16 +32,19 @@ func loadFile(fpath string) []string {
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
-	return lines
+	return lines, nil
 }
 
-func newParser(file string) parser {
-	lines := loadFile(file)
+func newParser(file string) (parser, error) {
+	lines, err := loadFile(file)
+	if err != nil {
+		return parser{}, err
+	}
 	return parser{
 		file,
 		lines,
 		map[string]taskDefinition{},
-	}
+	}, nil
 }
 
 func (p parser)parse() {
@@ -53,6 +58,7 @@ func (p parser)parse() {
 			p.tasks[ name ] = taskDefinition{
 				allTokens[i].pos,
 				allTokens[i].name,
+				string(allTokens[i].name[:len(allTokens[i].name)-1]),
 				dependencies,
 				commands,
 			}

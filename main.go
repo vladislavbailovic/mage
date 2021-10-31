@@ -1,13 +1,24 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func main() {
-	parser := newParser("fixtures/simple.mg")
-	parser.parse()
-	myAge := int64(0)
+	parser, err := newParser("fixtures/simple.mg")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-	stack := prepareEvaluationStack("root", parser, []task{})
+	myAge := int64(0)
+	stack, err := getStack("root", parser)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	for _, t := range stack {
 		if t.getAge() > myAge {
 			fmt.Println("... skip newer", t.getName())
@@ -20,16 +31,3 @@ func main() {
 	}
 }
 
-func prepareEvaluationStack(taskName string, parser parser, stack []task) []task {
-	dfn, ok := parser.tasks[taskName + ":"]
-	if !ok {
-		panic("Unable to resolve task definition for: " + taskName)
-	}
-	for _, dependency := range dfn.dependencies {
-		stack = prepareEvaluationStack(dependency, parser, stack)
-	}
-	item := newTask(dfn)
-	stack = append(stack, item)
-
-	return stack
-}

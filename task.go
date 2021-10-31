@@ -39,7 +39,7 @@ func (t fileTask)getAge() int64 {
 }
 
 func newTask(dfn taskDefinition) task {
-	_, err := os.Stat(dfn.name[:len(dfn.name)-1])
+	_, err := os.Stat(dfn.normalizedName)
 	if err != nil {
 		return ruleTask{executionItem{dfn.pos, dfn.name, dfn.commands}}
 	}
