@@ -1,4 +1,4 @@
-package main
+package ruleset
 
 import (
 	"os"
@@ -35,7 +35,7 @@ func loadFile(fpath string) ([]string, error) {
 	return lines, nil
 }
 
-func newParser(file string) (parser, error) {
+func NewParser(file string) (parser, error) {
 	lines, err := loadFile(file)
 	if err != nil {
 		return parser{}, err

@@ -1,4 +1,4 @@
-package main
+package ruleset
 
 type sourcePosition struct {
 	file string

@@ -1,4 +1,4 @@
-package main
+package ruleset
 
 import (
 	"os"
@@ -19,7 +19,7 @@ type recordStore struct {
 	records map[string]record
 }
 
-func newRecordStore(path string) *recordStore {
+func NewRecordStore(path string) *recordStore {
 	file, err := os.Open(path)
 	if err != nil {
 		return &recordStore{path, map[string]record{}}
@@ -35,12 +35,12 @@ func newRecordStore(path string) *recordStore {
 	return &store
 }
 
-func (rs *recordStore)recordTime(entry string) {
+func (rs *recordStore)RecordTime(entry string) {
 	r := record{entry, epoch(time.Now().Unix()) }
 	rs.records[entry] = r
 }
 
-func (rs recordStore)getTime(entry string) epoch {
+func (rs recordStore)GetTime(entry string) epoch {
 	r, ok := rs.records[entry]
 	if !ok {
 		return epoch(0)
@@ -48,7 +48,7 @@ func (rs recordStore)getTime(entry string) epoch {
 	return r.Timestamp
 }
 
-func (rs recordStore)save() error {
+func (rs recordStore)Save() error {
 	content, err := json.MarshalIndent(rs.records, "", " ")
 	if err != nil {
 		return err

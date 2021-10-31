@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"mage/ruleset"
 )
 
 const (
@@ -12,23 +14,23 @@ const (
 )
 
 func main() {
-	parser, err := newParser(FIXTURE)
+	parser, err := ruleset.NewParser(FIXTURE)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	store := newRecordStore(RECORD_STORE)
-	myAge := int64(store.getTime(ROOT_TASK))
-	stack, err := getStack(ROOT_TASK, parser)
+	store := ruleset.NewRecordStore(RECORD_STORE)
+	myAge := int64(store.GetTime(ROOT_TASK))
+	stack, err := ruleset.GetStack(ROOT_TASK, parser)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	evaluateStack(stack, myAge)
+	ruleset.EvaluateStack(stack, myAge, store)
 
-	store.recordTime("root")
-	store.save()
+	store.RecordTime("root")
+	store.Save()
 }
 

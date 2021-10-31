@@ -1,11 +1,11 @@
-package main
+package ruleset
 
 import (
 	"fmt"
 	"errors"
 )
 
-func getStack(startNode string, parser parser) ([]task, error) {
+func GetStack(startNode string, parser parser) ([]task, error) {
 	parser.parse()
 	stack, err := prepareEvaluationStack(startNode, parser, []task{})
 	if err != nil {
@@ -39,12 +39,11 @@ func prepareEvaluationStack(taskName string, parser parser, stack []task) ([]tas
 	return stack, nil
 }
 
-func evaluateStack(stack []task, epoch int64) {
-	store := newRecordStore(RECORD_STORE)
+func EvaluateStack(stack []task, epoch int64, store *recordStore) {
 	for _, t := range stack {
 		age := t.getAge()
 		if age == 0 {
-			age = int64(store.getTime(t.getName()))
+			age = int64(store.GetTime(t.getName()))
 		}
 
 		if age <= epoch {
@@ -54,12 +53,12 @@ func evaluateStack(stack []task, epoch int64) {
 		fmt.Println(">", t.getName())
 		evaluateTask(t, store)
 	}
-	store.save()
+	store.Save()
 }
 
 func evaluateTask(t task, store *recordStore) {
 	for idx, command := range t.getCommands() {
 		fmt.Println("\t -", idx, ":", command)
 	}
-	store.recordTime(t.getName())
+	store.RecordTime(t.getName())
 }
