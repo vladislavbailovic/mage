@@ -38,3 +38,28 @@ func prepareEvaluationStack(taskName string, parser parser, stack []task) ([]tas
 
 	return stack, nil
 }
+
+func evaluateStack(stack []task, epoch int64) {
+	store := newRecordStore(RECORD_STORE)
+	for _, t := range stack {
+		age := t.getAge()
+		if age == 0 {
+			age = int64(store.getTime(t.getName()))
+		}
+
+		if age <= epoch {
+			fmt.Println("... skip older", t.getName())
+			continue
+		}
+		fmt.Println(">", t.getName())
+		evaluateTask(t, store)
+	}
+	store.save()
+}
+
+func evaluateTask(t task, store *recordStore) {
+	for idx, command := range t.getCommands() {
+		fmt.Println("\t -", idx, ":", command)
+	}
+	store.recordTime(t.getName())
+}

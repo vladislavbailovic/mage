@@ -5,29 +5,30 @@ import (
 	"os"
 )
 
+const (
+	FIXTURE string = "fixtures/simple.mg"
+	RECORD_STORE string = "tmp/test.json"
+	ROOT_TASK string = "root"
+)
+
 func main() {
-	parser, err := newParser("fixtures/simple.mg")
+	parser, err := newParser(FIXTURE)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	myAge := int64(0)
-	stack, err := getStack("root", parser)
+	store := newRecordStore(RECORD_STORE)
+	myAge := int64(store.getTime(ROOT_TASK))
+	stack, err := getStack(ROOT_TASK, parser)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	for _, t := range stack {
-		if t.getAge() > myAge {
-			fmt.Println("... skip newer", t.getName())
-			continue
-		}
-		fmt.Println(">", t.getName())
-		for idx, command := range t.getCommands() {
-			fmt.Println("\t -", idx, ":", command)
-		}
-	}
+	evaluateStack(stack, myAge)
+
+	store.recordTime("root")
+	store.save()
 }
 

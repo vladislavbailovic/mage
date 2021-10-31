@@ -20,7 +20,7 @@ type ruleTask struct { executionItem }
 type fileTask struct { executionItem }
 
 func (r executionItem)getName() string {
-	return r.name
+	return r.name[:len(r.name)-1]
 }
 func (r executionItem)getCommands() []string {
 	return r.spec
