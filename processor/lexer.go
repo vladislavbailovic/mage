@@ -67,9 +67,16 @@ func lexLine(file string, linePos int, line string) []token {
 	return items
 }
 
+func isMacroCall(item string) bool {
+	if "$(" == string(item[0:2]) {
+		return true
+	}
+	return false
+}
+
 func getTokenType(item string, commandLine bool) typedefs.TokenType {
 	//fmt.Printf("\t\titem: [%s] [%s]\n", item, string(item[0:2]))
-	if "$(" == string(item[0:2]) {
+	if isMacroCall(item) {
 		return typedefs.TOKEN_MACRO_CALL
 	}
 

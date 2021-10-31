@@ -1,7 +1,6 @@
 package processor
 
 import (
-	"fmt"
 	"os"
 	"bufio"
 	"errors"
@@ -58,7 +57,11 @@ func (p Parser)Parse() {
 				if allTokens[j].kind == typedefs.TOKEN_MACRO_DFN_CLOSE {
 					break
 				}
-				value = value + " " + allTokens[j].name
+				if len(value) == 0 {
+					value = allTokens[j].name
+				} else {
+					value = value + " " + allTokens[j].name
+				}
 			}
 			p.Macros[ name ] = typedefs.MacroDefinition{
 				pos, name, value,
@@ -66,17 +69,27 @@ func (p Parser)Parse() {
 		}
 	}
 
-	for i := len(allTokens)-1; i >= 0; i-- {
-		switch allTokens[i].kind {
-		case typedefs.TOKEN_MACRO_CALL:
-			rawName := allTokens[i].name
-			name := string(rawName[2:len(rawName)-1])
-			macro, ok := p.Macros[ name ]
-			if !ok {
-				panic("Unknown macro: " + name)
+	for iter := 0; iter < 100; iter++ {
+		replaced := false
+		for i := len(allTokens)-1; i >= 0; i-- {
+			switch allTokens[i].kind {
+			case typedefs.TOKEN_MACRO_CALL:
+				rawName := allTokens[i].name
+				name := string(rawName[2:len(rawName)-1])
+				macro, ok := p.Macros[ name ]
+				if !ok {
+					panic("Unknown macro: " + name)
+				}
+				allTokens[i].name = macro.Value
+				if !isMacroCall(macro.Value) {
+					allTokens[i].kind = typedefs.TOKEN_WORD
+				} else {
+				}
+				replaced = true
 			}
-			allTokens[i].name = macro.Value
-			allTokens[i].kind = typedefs.TOKEN_WORD
+		}
+		if !replaced {
+			break
 		}
 	}
 
@@ -101,14 +114,11 @@ func (p Parser)Parse() {
 				dependencies = append(dependencies, allTokens[i].name)
 			}
 		case typedefs.TOKEN_COMMAND_OPEN:
-			fmt.Println("\tStop command")
 			inCommandBlock = false
 			commands = append(commands, allTokens[i].name)
 		case typedefs.TOKEN_COMMAND_CLOSE:
-			fmt.Println("\tStart command")
 			inCommandBlock = true
 		}
-		fmt.Printf("token [%s]: %d %b\n", allTokens[i].name, allTokens[i].kind, inCommandBlock)
 	}
 }
 
