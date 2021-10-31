@@ -4,6 +4,7 @@ import (
 	"os"
 	"bufio"
 	"errors"
+	"strings"
 
 	"mage/typedefs"
 )
@@ -83,7 +84,6 @@ func (p Parser)Parse() {
 				allTokens[i].name = macro.Value
 				if !isMacroCall(macro.Value) {
 					allTokens[i].kind = typedefs.TOKEN_WORD
-				} else {
 				}
 				replaced = true
 			}
@@ -94,6 +94,7 @@ func (p Parser)Parse() {
 	}
 
 	inCommandBlock := false;
+	currentCommand := []string{}
 	for i := len(allTokens)-1; i >= 0; i-- {
 		switch allTokens[i].kind {
 		case typedefs.TOKEN_RULE:
@@ -109,13 +110,15 @@ func (p Parser)Parse() {
 			commands = []string{}
 		case typedefs.TOKEN_WORD:
 			if inCommandBlock {
-				commands = append(commands, allTokens[i].name)
+				currentCommand = append(currentCommand, allTokens[i].name)
 			} else {
 				dependencies = append(dependencies, allTokens[i].name)
 			}
 		case typedefs.TOKEN_COMMAND_OPEN:
 			inCommandBlock = false
-			commands = append(commands, allTokens[i].name)
+			cmd := strings.Join(currentCommand, " ")
+			commands = append(commands, allTokens[i].name + " " + cmd)
+			currentCommand = []string{}
 		case typedefs.TOKEN_COMMAND_CLOSE:
 			inCommandBlock = true
 		}
