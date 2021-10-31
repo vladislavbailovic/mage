@@ -1,23 +1,19 @@
 package processor
 
 import (
+	"fmt"
 	"os"
 	"bufio"
 	"errors"
+
+	"mage/typedefs"
 )
 
 type Parser struct {
 	file string
 	source []string
-	Tasks map[string]TaskDefinition
-}
-
-type TaskDefinition struct {
-	Pos SourcePosition
-	Name string
-	NormalizedName string
-	Dependencies []string
-	Commands []string
+	Tasks map[string]typedefs.TaskDefinition
+	Macros map[string]typedefs.MacroDefinition
 }
 
 func loadFile(fpath string) ([]string, error) {
@@ -43,7 +39,8 @@ func NewParser(file string) (Parser, error) {
 	return Parser{
 		file,
 		lines,
-		map[string]TaskDefinition{},
+		map[string]typedefs.TaskDefinition{},
+		map[string]typedefs.MacroDefinition{},
 	}, nil
 }
 
@@ -53,9 +50,42 @@ func (p Parser)Parse() {
 	commands := []string{}
 	for i := len(allTokens)-1; i >= 0; i-- {
 		switch allTokens[i].kind {
-		case TYPE_RULE:
+		case typedefs.TOKEN_MACRO_DFN_OPEN:
+			pos := allTokens[i].pos
+			name := allTokens[i+1].name
+			value := ""
+			for j := i+2; j < len(allTokens) - 1; j++ {
+				if allTokens[j].kind == typedefs.TOKEN_MACRO_DFN_CLOSE {
+					break
+				}
+				value = value + " " + allTokens[j].name
+			}
+			p.Macros[ name ] = typedefs.MacroDefinition{
+				pos, name, value,
+			}
+		}
+	}
+
+	for i := len(allTokens)-1; i >= 0; i-- {
+		switch allTokens[i].kind {
+		case typedefs.TOKEN_MACRO_CALL:
+			rawName := allTokens[i].name
+			name := string(rawName[2:len(rawName)-1])
+			macro, ok := p.Macros[ name ]
+			if !ok {
+				panic("Unknown macro: " + name)
+			}
+			allTokens[i].name = macro.Value
+			allTokens[i].kind = typedefs.TOKEN_WORD
+		}
+	}
+
+	inCommandBlock := false;
+	for i := len(allTokens)-1; i >= 0; i-- {
+		switch allTokens[i].kind {
+		case typedefs.TOKEN_RULE:
 			name := allTokens[i].name
-			p.Tasks[ name ] = TaskDefinition{
+			p.Tasks[ name ] = typedefs.TaskDefinition{
 				allTokens[i].pos,
 				allTokens[i].name,
 				string(allTokens[i].name[:len(allTokens[i].name)-1]),
@@ -64,11 +94,21 @@ func (p Parser)Parse() {
 			}
 			dependencies = []string{}
 			commands = []string{}
-		case TYPE_WORD:
-			dependencies = append(dependencies, allTokens[i].name)
-		case TYPE_COMMAND:
+		case typedefs.TOKEN_WORD:
+			if inCommandBlock {
+				commands = append(commands, allTokens[i].name)
+			} else {
+				dependencies = append(dependencies, allTokens[i].name)
+			}
+		case typedefs.TOKEN_COMMAND_OPEN:
+			fmt.Println("\tStop command")
+			inCommandBlock = false
 			commands = append(commands, allTokens[i].name)
+		case typedefs.TOKEN_COMMAND_CLOSE:
+			fmt.Println("\tStart command")
+			inCommandBlock = true
 		}
+		fmt.Printf("token [%s]: %d %b\n", allTokens[i].name, allTokens[i].kind, inCommandBlock)
 	}
 }
 

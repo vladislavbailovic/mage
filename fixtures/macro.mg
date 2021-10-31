@@ -1,4 +1,7 @@
-macro NAME = whatever goes here, ends up here
+macro NAME whatever goes here, ends up here
 
-root:
+root: tmp/whatever.test
 	echo $(NAME)
+
+tmp/whatever.test:
+	echo nay nya $(NAME)

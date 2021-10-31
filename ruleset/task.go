@@ -3,11 +3,11 @@ package ruleset
 import (
 	"os"
 
-	"mage/processor"
+	"mage/typedefs"
 )
 
 type executionItem struct {
-	pos processor.SourcePosition
+	pos typedefs.SourcePosition
 	name string
 	spec []string
 }
@@ -40,7 +40,7 @@ func (t fileTask)getAge() int64 {
 	return f.ModTime().Unix()
 }
 
-func newTask(dfn processor.TaskDefinition) task {
+func newTask(dfn typedefs.TaskDefinition) task {
 	_, err := os.Stat(dfn.NormalizedName)
 	if err != nil {
 		return ruleTask{executionItem{dfn.Pos, dfn.Name, dfn.Commands}}
