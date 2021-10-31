@@ -2,18 +2,21 @@ package main
 
 import "fmt"
 
-type task struct {
-	pos sourcePosition
-	name string
-	spec []string
-}
-
 func main() {
 	parser := newParser("main.go")
 	parser.parse()
+	myAge := 0
 
 	stack := prepareEvaluationStack("root", parser, []task{})
-	fmt.Println(stack)
+	for _, t := range stack {
+		if t.getAge() > myAge {
+			continue
+		}
+		fmt.Println(">", t.getName())
+		for idx, command := range t.getCommands() {
+			fmt.Println("\t -", idx, ":", command)
+		}
+	}
 }
 
 func prepareEvaluationStack(taskName string, parser parser, stack []task) []task {
@@ -24,11 +27,7 @@ func prepareEvaluationStack(taskName string, parser parser, stack []task) []task
 	for _, dependency := range dfn.dependencies {
 		stack = prepareEvaluationStack(dependency, parser, stack)
 	}
-	item := task{
-		dfn.pos,
-		dfn.name,
-		dfn.commands,
-	}
+	item := newTask(dfn)
 	stack = append(stack, item)
 
 	return stack

@@ -26,8 +26,11 @@ func newParser(file string) parser {
 			"dep2: subdep1",
 			"\t#dep2 commands to execute",
 			"",
-			"dep1:",
+			"dep1: ./parser.go",
 			"\t# dep 1 commands to execute",
+			"",
+			"./parser.go:",
+			"\t# file commands",
 		},
 		map[string]taskDefinition{},
 	}
@@ -55,4 +58,13 @@ func (p parser)parse() {
 			commands = append(commands, allTokens[i].name)
 		}
 	}
+}
+
+func (p parser)knowsAboutTask(name string) bool {
+	for tname, _ := range p.tasks {
+		if name + ":" == tname {
+			return true
+		}
+	}
+	return false
 }
