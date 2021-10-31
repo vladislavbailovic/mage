@@ -1,17 +1,19 @@
 package ruleset
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_RecordStore(t *testing.T) {
 	store := NewRecordStore("../tmp/test.json")
-	store.recordTime("test")
+	store.RecordTime("test")
 
 	tm := store.GetTime("test")
 	if tm <= 0 {
 		t.Fatalf("recorded time should be larger than 0")
 	}
 
-	err := store.save()
+	err := store.Save()
 	if err != nil {
 		t.Log(err)
 		t.Fatalf("saving should be a success")

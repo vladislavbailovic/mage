@@ -4,17 +4,22 @@ import (
 	"fmt"
 	"os"
 
+	"mage/processor"
 	"mage/ruleset"
 )
 
 const (
-	FIXTURE string = "fixtures/simple.mg"
+	FIXTURE string = "fixtures/macro.mg"
 	RECORD_STORE string = "tmp/test.json"
 	ROOT_TASK string = "root"
 )
 
 func main() {
-	parser, err := ruleset.NewParser(FIXTURE)
+	evaluateRules()
+}
+
+func evaluateRules() {
+	parser, err := processor.NewParser(FIXTURE)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

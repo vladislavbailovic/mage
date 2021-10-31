@@ -3,10 +3,12 @@ package ruleset
 import (
 	"fmt"
 	"errors"
+
+	"mage/processor"
 )
 
-func GetStack(startNode string, parser parser) ([]task, error) {
-	parser.parse()
+func GetStack(startNode string, parser processor.Parser) ([]task, error) {
+	parser.Parse()
 	stack, err := prepareEvaluationStack(startNode, parser, []task{})
 	if err != nil {
 		return nil, err
@@ -14,20 +16,20 @@ func GetStack(startNode string, parser parser) ([]task, error) {
 	return stack, nil
 }
 
-func prepareEvaluationStack(taskName string, parser parser, stack []task) ([]task, error) {
-	dfn, ok := parser.tasks[taskName + ":"]
+func prepareEvaluationStack(taskName string, parser processor.Parser, stack []task) ([]task, error) {
+	dfn, ok := parser.Tasks[taskName + ":"]
 	if !ok {
 		return nil, errors.New("Unable to resolve task definition for: " + taskName)
 	}
 	var err error
-	for _, dependency := range dfn.dependencies {
+	for _, dependency := range dfn.Dependencies {
 		stack, err = prepareEvaluationStack(dependency, parser, stack)
 		if err != nil {
 			errMsg := fmt.Errorf(
 				"file %s, line %d (%s) %v",
-				dfn.pos.file,
-				dfn.pos.line,
-				dfn.normalizedName,
+				dfn.Pos.File,
+				dfn.Pos.Line,
+				dfn.NormalizedName,
 				err,
 			)
 			return nil, errMsg

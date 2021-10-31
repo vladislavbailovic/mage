@@ -1,13 +1,13 @@
-package ruleset
+package processor
 
-type sourcePosition struct {
-	file string
-	line int
-	char int
+type SourcePosition struct {
+	File string
+	Line int
+	Char int
 }
 
 type token struct {
-	pos sourcePosition
+	pos SourcePosition
 	kind tokenType
 	name string
 }
@@ -22,7 +22,7 @@ const (
 
 func newToken(ttype tokenType, file string, line int, pos int, item string) token {
 	return token{
-		sourcePosition{ file, line, pos - len(item) },
+		SourcePosition{ file, line, pos - len(item) },
 		ttype,
 		item,
 	}

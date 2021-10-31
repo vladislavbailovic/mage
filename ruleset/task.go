@@ -2,10 +2,12 @@ package ruleset
 
 import (
 	"os"
+
+	"mage/processor"
 )
 
 type executionItem struct {
-	pos sourcePosition
+	pos processor.SourcePosition
 	name string
 	spec []string
 }
@@ -38,10 +40,10 @@ func (t fileTask)getAge() int64 {
 	return f.ModTime().Unix()
 }
 
-func newTask(dfn taskDefinition) task {
-	_, err := os.Stat(dfn.normalizedName)
+func newTask(dfn processor.TaskDefinition) task {
+	_, err := os.Stat(dfn.NormalizedName)
 	if err != nil {
-		return ruleTask{executionItem{dfn.pos, dfn.name, dfn.commands}}
+		return ruleTask{executionItem{dfn.Pos, dfn.Name, dfn.Commands}}
 	}
-	return fileTask{executionItem{dfn.pos, dfn.name, dfn.commands}}
+	return fileTask{executionItem{dfn.Pos, dfn.Name, dfn.Commands}}
 }

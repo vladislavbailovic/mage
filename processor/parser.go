@@ -1,4 +1,4 @@
-package ruleset
+package processor
 
 import (
 	"os"
@@ -6,18 +6,18 @@ import (
 	"errors"
 )
 
-type parser struct {
+type Parser struct {
 	file string
 	source []string
-	tasks map[string]taskDefinition
+	Tasks map[string]TaskDefinition
 }
 
-type taskDefinition struct {
-	pos sourcePosition
-	name string
-	normalizedName string
-	dependencies []string
-	commands []string
+type TaskDefinition struct {
+	Pos SourcePosition
+	Name string
+	NormalizedName string
+	Dependencies []string
+	Commands []string
 }
 
 func loadFile(fpath string) ([]string, error) {
@@ -35,19 +35,19 @@ func loadFile(fpath string) ([]string, error) {
 	return lines, nil
 }
 
-func NewParser(file string) (parser, error) {
+func NewParser(file string) (Parser, error) {
 	lines, err := loadFile(file)
 	if err != nil {
-		return parser{}, err
+		return Parser{}, err
 	}
-	return parser{
+	return Parser{
 		file,
 		lines,
-		map[string]taskDefinition{},
+		map[string]TaskDefinition{},
 	}, nil
 }
 
-func (p parser)parse() {
+func (p Parser)Parse() {
 	allTokens := lex(p.file, p.source)
 	dependencies := []string{}
 	commands := []string{}
@@ -55,7 +55,7 @@ func (p parser)parse() {
 		switch allTokens[i].kind {
 		case TYPE_RULE:
 			name := allTokens[i].name
-			p.tasks[ name ] = taskDefinition{
+			p.Tasks[ name ] = TaskDefinition{
 				allTokens[i].pos,
 				allTokens[i].name,
 				string(allTokens[i].name[:len(allTokens[i].name)-1]),
@@ -72,8 +72,8 @@ func (p parser)parse() {
 	}
 }
 
-func (p parser)knowsAboutTask(name string) bool {
-	for tname, _ := range p.tasks {
+func (p Parser)knowsAboutTask(name string) bool {
+	for tname, _ := range p.Tasks {
 		if name + ":" == tname {
 			return true
 		}
