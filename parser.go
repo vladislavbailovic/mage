@@ -1,5 +1,10 @@
 package main
 
+import (
+	"os"
+	"bufio"
+)
+
 type parser struct {
 	file string
 	source []string
@@ -13,25 +18,26 @@ type taskDefinition struct {
 	commands []string
 }
 
+func loadFile(fpath string) []string {
+	fp, err := os.Open(fpath)
+	if err != nil {
+		panic("Error reading file: " + fpath)
+	}
+	defer fp.Close()
+
+	lines := []string{}
+	scanner := bufio.NewScanner(fp)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	return lines
+}
+
 func newParser(file string) parser {
+	lines := loadFile(file)
 	return parser{
 		file,
-		[]string {
-			"root: dep2 dep1",
-			"\t# root commands to execute",
-			"",
-			"subdep1:",
-			"\t#subdep1 commands",
-			"",
-			"dep2: subdep1",
-			"\t#dep2 commands to execute",
-			"",
-			"dep1: ./parser.go",
-			"\t# dep 1 commands to execute",
-			"",
-			"./parser.go:",
-			"\t# file commands",
-		},
+		lines,
 		map[string]taskDefinition{},
 	}
 }

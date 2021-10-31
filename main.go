@@ -3,13 +3,14 @@ package main
 import "fmt"
 
 func main() {
-	parser := newParser("main.go")
+	parser := newParser("fixtures/simple.mg")
 	parser.parse()
-	myAge := 0
+	myAge := int64(0)
 
 	stack := prepareEvaluationStack("root", parser, []task{})
 	for _, t := range stack {
 		if t.getAge() > myAge {
+			fmt.Println("... skip newer", t.getName())
 			continue
 		}
 		fmt.Println(">", t.getName())
