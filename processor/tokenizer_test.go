@@ -7,7 +7,7 @@ import (
 	"mage/typedefs"
 )
 
-func Test_LexFile(t *testing.T) {
+func Test_Tokenize(t *testing.T) {
 	lines, _ := loadFile("../fixtures/macro.mg")
 	tokens := tokenize("test", strings.Join(lines, "\n"))
 	expected := 63
