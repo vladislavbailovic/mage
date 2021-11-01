@@ -9,4 +9,4 @@ root: tmp/whatever.test
 
 tmp/whatever.test:
 	echo nay nya $(OTHER)
-	sed -e 's/ $(M5) /nana/g'
+	sed -e 's/$(M5)/nana/g'
