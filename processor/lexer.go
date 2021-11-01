@@ -147,7 +147,7 @@ func xlex(file string, content string) []xtoken {
 
 		if "\t" == string(content[pos]) {
 			// Command
-			pos++
+			pos += 1
 			command := consumeUntil("\n", content, pos)
 			allTokens = append(allTokens, xtoken{
 				typedefs.SourcePosition{file, currentLine, currentChar + 1},
@@ -170,6 +170,7 @@ func xlex(file string, content string) []xtoken {
 		if len(content) >= pos+5 && "macro" == string(content[pos:pos+5]) {
 			// Macro definition
 			pos += 5 + 1
+			currentChar += 5
 			macro := consumeUntil("\n", content, pos)
 			fmt.Printf("\tmacro [%s]\n", macro)
 			allTokens = append(allTokens, xtoken{
@@ -242,7 +243,7 @@ func xlex(file string, content string) []xtoken {
 				typedefs.TOKEN_RULE_CLOSE,
 				"",
 			})
-			pos += len(dependencies) + len(name)
+			pos += len(dependencies) + 1
 			word = ""
 			continue
 		}
