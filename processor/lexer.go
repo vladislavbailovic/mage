@@ -135,7 +135,7 @@ func xlex(file string, content string) []xtoken {
 				allTokens = append(allTokens, xtoken{
 					typedefs.SourcePosition{file, currentLine, currentChar + 1},
 					typedefs.TOKEN_WORD,
-					"[" + word + "]",
+					word,
 				})
 				word = ""
 			}
@@ -221,36 +221,37 @@ func xlex(file string, content string) []xtoken {
 			continue
 		}
 
-		// if ":" == string(content[pos]) {
-		// 	// Rule definition
-		// 	fmt.Printf("adding rule dfn\n")
-		// 	name := consumeBackUntil("\n", content, pos-1)
-		// 	dependencies := consumeUntil("\n", content, pos+1)
-		// 	allTokens = append(allTokens, xtoken{
-		// 		typedefs.SourcePosition{file, currentLine, currentChar + 1},
-		// 		typedefs.TOKEN_RULE_OPEN,
-		// 		"",
-		// 	})
-		// 	for _, tk := range xlex(file, name) {
-		// 		allTokens = append(allTokens, tk)
-		// 	}
-		// 	for _, tk := range xlex(file, dependencies) {
-		// 		allTokens = append(allTokens, tk)
-		// 	}
-		// 	allTokens = append(allTokens, xtoken{
-		// 		typedefs.SourcePosition{file, currentLine, currentChar + 1},
-		// 		typedefs.TOKEN_RULE_CLOSE,
-		// 		"",
-		// 	})
-		// 	pos += len(dependencies)
-		// 	continue
-		// }
+		if ":" == string(content[pos]) {
+			// Rule definition
+			name := consumeBackUntil("\n", content, pos-1)
+			dependencies := consumeUntil("\n", content, pos+1)
+			fmt.Printf("adding rule dfn: [%v] [%v]\n", name, dependencies)
+			allTokens = append(allTokens, xtoken{
+				typedefs.SourcePosition{file, currentLine, currentChar + 1},
+				typedefs.TOKEN_RULE_OPEN,
+				"",
+			})
+			for _, tk := range xlex(file, name) {
+				allTokens = append(allTokens, tk)
+			}
+			for _, tk := range xlex(file, dependencies) {
+				allTokens = append(allTokens, tk)
+			}
+			allTokens = append(allTokens, xtoken{
+				typedefs.SourcePosition{file, currentLine, currentChar + 1},
+				typedefs.TOKEN_RULE_CLOSE,
+				"",
+			})
+			pos += len(dependencies) + len(name)
+			word = ""
+			continue
+		}
 
 		if " " == string(content[pos]) && len(word) > 0 {
 			allTokens = append(allTokens, xtoken{
 				typedefs.SourcePosition{file, currentLine, currentChar + 1},
 				typedefs.TOKEN_WORD,
-				"|" + word + "|",
+				word,
 			})
 			word = ""
 			pos += 1
