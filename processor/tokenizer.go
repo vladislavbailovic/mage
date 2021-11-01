@@ -5,23 +5,23 @@ import (
 	"mage/typedefs"
 )
 
-type xtoken struct {
+type token struct {
 	pos typedefs.SourcePosition
 	kind typedefs.TokenType
 	value string
 }
 
-func tokenize(file string, content string) []xtoken {
+func tokenize(file string, content string) []token {
 	content += " \n"
 	currentLine := 1
 	currentChar := 1
-	allTokens := []xtoken{}
+	allTokens := []token{}
 	word := ""
 	for pos := 0; pos < len(content) - 1; {
 
 		if "\n" == string(content[pos]) {
 			if len(word) > 0 {
-				allTokens = append(allTokens, xtoken{
+				allTokens = append(allTokens, token{
 					typedefs.SourcePosition{file, currentLine, currentChar + 1},
 					typedefs.TOKEN_WORD,
 					word,
@@ -38,7 +38,7 @@ func tokenize(file string, content string) []xtoken {
 			// Command
 			pos += 1
 			command := consumeUntil("\n", content, pos)
-			allTokens = append(allTokens, xtoken{
+			allTokens = append(allTokens, token{
 				typedefs.SourcePosition{file, currentLine, currentChar + 1},
 				typedefs.TOKEN_COMMAND_OPEN,
 				"",
@@ -46,7 +46,7 @@ func tokenize(file string, content string) []xtoken {
 			for _, tk := range tokenize(file, command) {
 				allTokens = append(allTokens, tk)
 			}
-			allTokens = append(allTokens, xtoken{
+			allTokens = append(allTokens, token{
 				typedefs.SourcePosition{file, currentLine, currentChar + 1},
 				typedefs.TOKEN_COMMAND_CLOSE,
 				"",
@@ -62,7 +62,7 @@ func tokenize(file string, content string) []xtoken {
 			currentChar += 5
 			macro := consumeUntil("\n", content, pos)
 			fmt.Printf("\tmacro [%s]\n", macro)
-			allTokens = append(allTokens, xtoken{
+			allTokens = append(allTokens, token{
 				typedefs.SourcePosition{file, currentLine, currentChar + 1},
 				typedefs.TOKEN_MACRO_DFN_OPEN,
 				"",
@@ -70,7 +70,7 @@ func tokenize(file string, content string) []xtoken {
 			for _, tk := range tokenize(file, macro) {
 				allTokens = append(allTokens, tk)
 			}
-			allTokens = append(allTokens, xtoken{
+			allTokens = append(allTokens, token{
 				typedefs.SourcePosition{file, currentLine, currentChar + 1},
 				typedefs.TOKEN_MACRO_DFN_CLOSE,
 				"",
@@ -82,7 +82,7 @@ func tokenize(file string, content string) []xtoken {
 
 		if len(content) >= pos+2 && "$(" == string(content[pos:pos+2]) {
 			if len(word) > 0 {
-				allTokens = append(allTokens, xtoken{
+				allTokens = append(allTokens, token{
 					typedefs.SourcePosition{file, currentLine, currentChar + 1},
 					typedefs.TOKEN_WORD,
 					word,
@@ -93,7 +93,7 @@ func tokenize(file string, content string) []xtoken {
 			pos += 2
 			macro := consumeUntil(")", content, pos)
 			fmt.Printf("macro call: [%s]\n", macro)
-			allTokens = append(allTokens, xtoken{
+			allTokens = append(allTokens, token{
 				typedefs.SourcePosition{file, currentLine, currentChar + 1},
 				typedefs.TOKEN_MACRO_CALL_OPEN,
 				"",
@@ -101,7 +101,7 @@ func tokenize(file string, content string) []xtoken {
 			for _, tk := range tokenize(file, macro) {
 				allTokens = append(allTokens, tk)
 			}
-			allTokens = append(allTokens, xtoken{
+			allTokens = append(allTokens, token{
 				typedefs.SourcePosition{file, currentLine, currentChar + 1},
 				typedefs.TOKEN_MACRO_CALL_CLOSE,
 				"",
@@ -116,7 +116,7 @@ func tokenize(file string, content string) []xtoken {
 			name := consumeBackUntil("\n", content, pos-1)
 			dependencies := consumeUntil("\n", content, pos+1)
 			fmt.Printf("adding rule dfn: [%v] [%v]\n", name, dependencies)
-			allTokens = append(allTokens, xtoken{
+			allTokens = append(allTokens, token{
 				typedefs.SourcePosition{file, currentLine, currentChar + 1},
 				typedefs.TOKEN_RULE_OPEN,
 				"",
@@ -127,7 +127,7 @@ func tokenize(file string, content string) []xtoken {
 			for _, tk := range tokenize(file, dependencies) {
 				allTokens = append(allTokens, tk)
 			}
-			allTokens = append(allTokens, xtoken{
+			allTokens = append(allTokens, token{
 				typedefs.SourcePosition{file, currentLine, currentChar + 1},
 				typedefs.TOKEN_RULE_CLOSE,
 				"",
@@ -138,7 +138,7 @@ func tokenize(file string, content string) []xtoken {
 		}
 
 		if " " == string(content[pos]) && len(word) > 0 {
-			allTokens = append(allTokens, xtoken{
+			allTokens = append(allTokens, token{
 				typedefs.SourcePosition{file, currentLine, currentChar + 1},
 				typedefs.TOKEN_WORD,
 				word,
@@ -190,8 +190,8 @@ func consumeBackUntil(what string, source string, pos int) string {
 	return item
 }
 
-func filterTokens(tokens []xtoken, expected typedefs.TokenType) []xtoken {
-	result := []xtoken{}
+func filterTokens(tokens []token, expected typedefs.TokenType) []token {
+	result := []token{}
 	for _, tk := range tokens {
 		if expected != tk.kind {
 			continue
@@ -201,7 +201,7 @@ func filterTokens(tokens []xtoken, expected typedefs.TokenType) []xtoken {
 	return result
 }
 
-// func transform(tokens []xtoken) []xtoken {
+// func transform(tokens []token) []token {
 // 	macros := filterTokens(tokens, typedefs.TOKEN_MACRO_DFN)
 // 	for _, macroToken := range macros {
 // 		for i, tk := range tokens {

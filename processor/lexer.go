@@ -4,23 +4,23 @@ import (
 	"mage/typedefs"
 )
 
-type token struct {
+type ttoken struct {
 	pos typedefs.SourcePosition
 	kind typedefs.TokenType
 	name string
 }
 
 
-func newToken(ttype typedefs.TokenType, file string, line int, pos int, item string) token {
-	return token{
+func newToken(ttype typedefs.TokenType, file string, line int, pos int, item string) ttoken {
+	return ttoken{
 		typedefs.SourcePosition{ file, line, pos - len(item) },
 		ttype,
 		item,
 	}
 }
 
-func lexLine(file string, linePos int, line string) []token {
-	items := []token{}
+func lexLine(file string, linePos int, line string) []ttoken {
+	items := []ttoken{}
 	item := ""
 	macroOpen := false
 	commandLineOpen := false
@@ -99,8 +99,8 @@ func getTokenType(item string, commandLine bool) typedefs.TokenType {
 	return currentType
 }
 
-func lex(file string, fileLines []string) []token {
-	result := []token{}
+func lex(file string, fileLines []string) []ttoken {
+	result := []ttoken{}
 	for idx, line := range fileLines {
 		for _, tk := range lexLine(file, idx+1, line) {
 			result = append(result, tk)

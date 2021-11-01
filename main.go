@@ -15,7 +15,7 @@ const (
 )
 
 func main() {
-	evaluateRules()
+	// evaluateRules()
 }
 
 func evaluateRules() {
