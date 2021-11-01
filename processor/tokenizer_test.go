@@ -9,7 +9,7 @@ import (
 
 func Test_LexFile(t *testing.T) {
 	lines, _ := loadFile("../fixtures/macro.mg")
-	tokens := xlex("test", strings.Join(lines, "\n"))
+	tokens := tokenize("test", strings.Join(lines, "\n"))
 	expected := 63
 	if expected != len(tokens) {
 		t.Fatalf("expected %d tokens, but got %d", expected, len(tokens))
@@ -29,7 +29,7 @@ func Test_LexFile(t *testing.T) {
 
 // func Test_Transform(t *testing.T) {
 // 	lines, _ := loadFile("../fixtures/macro.mg")
-// 	tokens := xlex("test", strings.Join(lines, "\n"))
+// 	tokens := tokenize("test", strings.Join(lines, "\n"))
 // 	transformedTokens := transform(tokens)
 // 	for _, tk := range transformedTokens {
 // 		t.Log(tk)
