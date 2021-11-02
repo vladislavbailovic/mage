@@ -335,35 +335,29 @@ func (t *tokenizer)tokenize() []token {
 			}
 		}
 
-		// if len(content) >= pos+2 && "$(" == string(content[pos:pos+2]) {
-		// 	if len(word) > 0 {
-		// 		allTokens = append(allTokens, token{
-		// 			typedefs.SourcePosition{file, currentLine, currentChar + 1},
-		// 			typedefs.TOKEN_WORD,
-		// 			word,
-		// 		})
-		// 		word = ""
-		// 	}
-		// 	// Macro call
-		// 	pos += 2
-		// 	macro := consumeUntil(")", content, pos)
-		// 	allTokens = append(allTokens, token{
-		// 		typedefs.SourcePosition{file, currentLine, currentChar + 1},
-		// 		typedefs.TOKEN_MACRO_CALL_OPEN,
-		// 		"",
-		// 	})
-		// 	for _, tk := range tokenize(file, macro, currentLine, currentChar) {
-		// 		allTokens = append(allTokens, tk)
-		// 	}
-		// 	allTokens = append(allTokens, token{
-		// 		typedefs.SourcePosition{file, currentLine, currentChar + 1},
-		// 		typedefs.TOKEN_MACRO_CALL_CLOSE,
-		// 		"",
-		// 	})
-		// 	pos += len(macro) + 1
-			// word = ""
-			// continue
-		// }
+		kw = "$("
+		kwLen = len(kw)
+		matchEnd = t.position.cursor + kwLen
+		if len(content) >= matchEnd {
+			match := string(content[t.position.cursor:matchEnd])
+			if kw == match {
+				if len(word) > 0 {
+					t.addNewToken(typedefs.TOKEN_WORD, word)
+					word = ""
+				}
+				// Macro call
+				t.position.advanceCursor(2)
+				macro := consumeUntil(")", content, t.position.cursor)
+				t.addNewToken(typedefs.TOKEN_MACRO_CALL_OPEN, "")
+				for _, tk := range t.getSubtokens(macro) {
+					t.addToken(tk)
+				}
+				t.addNewToken(typedefs.TOKEN_MACRO_CALL_CLOSE, "")
+				t.position.advance(len(macro)+1)
+				word = ""
+				continue
+			}
+		}
 
 		// if ":" == string(content[pos]) {
 		// 	// Rule definition
@@ -390,19 +384,14 @@ func (t *tokenizer)tokenize() []token {
 		// 	continue
 		// }
 
-		// if " " == string(content[pos]) && len(word) > 0 {
-		// 	allTokens = append(allTokens, token{
-		// 		typedefs.SourcePosition{file, currentLine, currentChar + 1},
-		// 		typedefs.TOKEN_WORD,
-		// 		word,
-		// 	})
-		// 	word = ""
-		// 	pos += 1
-		// 	currentChar += 1
-		// 	continue
-		// }
+		if " " == chr && len(word) > 0 {
+			t.addNewToken(typedefs.TOKEN_WORD, word)
+			word = ""
+			t.position.advance(1)
+			continue
+		}
 
-		// word += string(content[pos])
+		word += chr
 
 		t.position.advance(1)
 	}
