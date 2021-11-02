@@ -66,11 +66,35 @@ func (t *tokenizer)addToken(tk token) {
 	t.tokens = append(t.tokens, tk)
 }
 
-func (t *tokenizer)getSubtokens(substr string) []token {
+func (t *tokenizer)tokenizeSubstring(substr string) []token {
 	subt := newTokenizer(t.position.source, substr)
 	subt.position.advanceLine(t.position.currentLine)
 	subt.position.advanceChar(t.position.currentChar)
 	return subt.tokenize()
+}
+
+func (t *tokenizer)processNewline(word string) string {
+	if len(word) > 0 {
+		t.addNewToken(typedefs.TOKEN_WORD, word)
+		word = ""
+	}
+	t.position.advance(1)
+	t.position.advanceLine(1)
+	return word
+}
+
+func (t *tokenizer)processCommand(word string) string {
+	// Command
+	content := t.content + " \n"
+	t.position.advanceCursor(1)
+	command := consumeUntil("\n", content, t.position.cursor)
+	t.addNewToken(typedefs.TOKEN_COMMAND_OPEN, "")
+	for _, tk := range t.tokenizeSubstring(command) {
+		t.addToken(tk)
+	}
+	t.addNewToken(typedefs.TOKEN_COMMAND_CLOSE, "")
+	t.position.advanceCursor(len(command))
+	return ""
 }
 
 func (t *tokenizer)tokenize() []token {
@@ -80,26 +104,12 @@ func (t *tokenizer)tokenize() []token {
 		chr := string(content[t.position.cursor])
 
 		if "\n" == chr {
-			if len(word) > 0 {
-				t.addNewToken(typedefs.TOKEN_WORD, word)
-				word = ""
-			}
-			t.position.advance(1)
-			t.position.advanceLine(1)
+			word = t.processNewline(word)
 			continue
 		}
 
 		if "\t" == chr {
-			// Command
-			t.position.advanceCursor(1)
-			command := consumeUntil("\n", content, t.position.cursor)
-			t.addNewToken(typedefs.TOKEN_COMMAND_OPEN, "")
-			for _, tk := range t.getSubtokens(command) {
-				t.addToken(tk)
-			}
-			t.addNewToken(typedefs.TOKEN_COMMAND_CLOSE, "")
-			t.position.advanceCursor(len(command))
-			word = ""
+			word = t.processCommand(word)
 			continue
 		}
 
@@ -113,7 +123,7 @@ func (t *tokenizer)tokenize() []token {
 				t.position.advanceCursor(kwLen + 1)
 				macro := consumeUntil("\n", content, t.position.cursor)
 				t.addNewToken(typedefs.TOKEN_MACRO_DFN_OPEN, "")
-				for _, tk := range t.getSubtokens(macro) {
+				for _, tk := range t.tokenizeSubstring(macro) {
 					t.addToken(tk)
 				}
 				t.addNewToken(typedefs.TOKEN_MACRO_DFN_CLOSE, "")
@@ -137,7 +147,7 @@ func (t *tokenizer)tokenize() []token {
 				t.position.advanceCursor(2)
 				macro := consumeUntil(")", content, t.position.cursor)
 				t.addNewToken(typedefs.TOKEN_MACRO_CALL_OPEN, "")
-				for _, tk := range t.getSubtokens(macro) {
+				for _, tk := range t.tokenizeSubstring(macro) {
 					t.addToken(tk)
 				}
 				t.addNewToken(typedefs.TOKEN_MACRO_CALL_CLOSE, "")
@@ -152,10 +162,10 @@ func (t *tokenizer)tokenize() []token {
 			name := consumeBackUntil("\n", content, t.position.cursor-1)
 			dependencies := consumeUntil("\n", content, t.position.cursor+1)
 			t.addNewToken(typedefs.TOKEN_RULE_OPEN, "")
-			for _, tk := range t.getSubtokens(name) {
+			for _, tk := range t.tokenizeSubstring(name) {
 				t.addToken(tk)
 			}
-			for _, tk := range t.getSubtokens(dependencies) {
+			for _, tk := range t.tokenizeSubstring(dependencies) {
 				t.addToken(tk)
 			}
 			t.addNewToken(typedefs.TOKEN_RULE_CLOSE, "")

@@ -64,6 +64,15 @@ func Test_TokenizerSetsProperPositions_Command(t *testing.T) {
 	}
 }
 
+// func Test_TokenizerSetsProperPositions_MacroCall(t *testing.T) {
+// 	lines, _ := loadFile("../fixtures/macro.mg")
+// 	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
+// 	tkn.tokenize()
+
+// 	callOpens := tkn.filter(typedefs.TOKEN_MACRO_CALL_OPEN)
+// 	t.Log(callOpens)
+// }
+
 func Test_TokenizerPosition(t *testing.T) {
 	pos := tokenizerPosition{"test", 0, 0, 0 }
 	pos.advance(161)
