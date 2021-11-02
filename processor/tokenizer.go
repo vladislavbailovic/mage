@@ -315,27 +315,25 @@ func (t *tokenizer)tokenize() []token {
 			continue
 		}
 
-		// if len(content) >= pos+5 && "macro" == string(content[pos:pos+5]) {
-		// 	// Macro definition
-		// 	pos += 5 + 1
-		// 	macro := consumeUntil("\n", content, pos)
-		// 	allTokens = append(allTokens, token{
-		// 		typedefs.SourcePosition{file, currentLine, currentChar + 1},
-		// 		typedefs.TOKEN_MACRO_DFN_OPEN,
-		// 		"",
-		// 	})
-		// 	for _, tk := range tokenize(file, macro, currentLine, currentChar) {
-		// 		allTokens = append(allTokens, tk)
-		// 	}
-		// 	allTokens = append(allTokens, token{
-		// 		typedefs.SourcePosition{file, currentLine, currentChar + 1},
-		// 		typedefs.TOKEN_MACRO_DFN_CLOSE,
-		// 		"",
-		// 	})
-		// 	pos += len(macro)
-		// 	word = ""
-		// 	continue
-		// }
+		kw := "macro"
+		kwLen := len(kw)
+		matchEnd := t.position.cursor + kwLen
+		if len(content) >= matchEnd {
+			match := string(content[t.position.cursor:matchEnd])
+			if kw == match {
+				// Macro definition
+				t.position.advanceCursor(kwLen + 1)
+				macro := consumeUntil("\n", content, t.position.cursor)
+				t.addNewToken(typedefs.TOKEN_MACRO_DFN_OPEN, "")
+				for _, tk := range t.getSubtokens(macro) {
+					t.addToken(tk)
+				}
+				t.addNewToken(typedefs.TOKEN_MACRO_DFN_CLOSE, "")
+				t.position.advanceCursor(len(macro))
+				word = ""
+				continue
+			}
+		}
 
 		// if len(content) >= pos+2 && "$(" == string(content[pos:pos+2]) {
 		// 	if len(word) > 0 {
