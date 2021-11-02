@@ -1,7 +1,6 @@
 package processor
 
 import (
-	"fmt"
 	"mage/typedefs"
 )
 
@@ -11,10 +10,16 @@ type token struct {
 	value string
 }
 
-func tokenize(file string, content string) []token {
+func tokenize(file string, content string, initPos ...int) []token {
 	content += " \n"
 	currentLine := 1
+	if len(initPos) > 0 {
+		currentLine = initPos[0]
+	}
 	currentChar := 1
+	if len(initPos) > 1 {
+		currentChar = initPos[1]
+	}
 	allTokens := []token{}
 	word := ""
 	for pos := 0; pos < len(content) - 1; {
@@ -43,7 +48,7 @@ func tokenize(file string, content string) []token {
 				typedefs.TOKEN_COMMAND_OPEN,
 				"",
 			})
-			for _, tk := range tokenize(file, command) {
+			for _, tk := range tokenize(file, command, currentLine, currentChar) {
 				allTokens = append(allTokens, tk)
 			}
 			allTokens = append(allTokens, token{
@@ -59,15 +64,13 @@ func tokenize(file string, content string) []token {
 		if len(content) >= pos+5 && "macro" == string(content[pos:pos+5]) {
 			// Macro definition
 			pos += 5 + 1
-			currentChar += 5
 			macro := consumeUntil("\n", content, pos)
-			fmt.Printf("\tmacro [%s]\n", macro)
 			allTokens = append(allTokens, token{
 				typedefs.SourcePosition{file, currentLine, currentChar + 1},
 				typedefs.TOKEN_MACRO_DFN_OPEN,
 				"",
 			})
-			for _, tk := range tokenize(file, macro) {
+			for _, tk := range tokenize(file, macro, currentLine, currentChar) {
 				allTokens = append(allTokens, tk)
 			}
 			allTokens = append(allTokens, token{
@@ -92,13 +95,12 @@ func tokenize(file string, content string) []token {
 			// Macro call
 			pos += 2
 			macro := consumeUntil(")", content, pos)
-			fmt.Printf("macro call: [%s]\n", macro)
 			allTokens = append(allTokens, token{
 				typedefs.SourcePosition{file, currentLine, currentChar + 1},
 				typedefs.TOKEN_MACRO_CALL_OPEN,
 				"",
 			})
-			for _, tk := range tokenize(file, macro) {
+			for _, tk := range tokenize(file, macro, currentLine, currentChar) {
 				allTokens = append(allTokens, tk)
 			}
 			allTokens = append(allTokens, token{
@@ -115,16 +117,15 @@ func tokenize(file string, content string) []token {
 			// Rule definition
 			name := consumeBackUntil("\n", content, pos-1)
 			dependencies := consumeUntil("\n", content, pos+1)
-			fmt.Printf("adding rule dfn: [%v] [%v]\n", name, dependencies)
 			allTokens = append(allTokens, token{
 				typedefs.SourcePosition{file, currentLine, currentChar + 1},
 				typedefs.TOKEN_RULE_OPEN,
 				"",
 			})
-			for _, tk := range tokenize(file, name) {
+			for _, tk := range tokenize(file, name, currentLine, currentChar) {
 				allTokens = append(allTokens, tk)
 			}
-			for _, tk := range tokenize(file, dependencies) {
+			for _, tk := range tokenize(file, dependencies, currentLine, currentChar) {
 				allTokens = append(allTokens, tk)
 			}
 			allTokens = append(allTokens, token{
@@ -213,3 +214,37 @@ func filterTokens(tokens []token, expected typedefs.TokenType) []token {
 // 	}
 // 	return tokens
 // }
+
+type tokenizer struct {
+	tokens []token
+	content string
+	position tokenizerPosition
+}
+
+type tokenizerPosition struct {
+	source string
+	cursor int
+	currentLine int
+	currentChar int
+}
+
+func (tp *tokenizerPosition)advanceCursor(chr int) {
+	tp.cursor += 1
+}
+func (tp *tokenizerPosition)advanceChar(chr int) {
+	tp.currentChar += 1
+}
+func (tp *tokenizerPosition)advanceLine(chr int) {
+	tp.currentLine += 1
+}
+func (tp *tokenizerPosition)advance(chr int) {
+	tp.advanceCursor(chr)
+	tp.advanceChar(chr)
+}
+func (tp tokenizerPosition)getPosition() typedefs.SourcePosition {
+	return typedefs.SourcePosition{
+		tp.source,
+		tp.currentLine,
+		tp.currentChar,
+	}
+}
