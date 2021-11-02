@@ -22,8 +22,18 @@ func Test_Tokenize(t *testing.T) {
 	if 2 != len(tokRules) {
 		t.Fatalf("there should be 2 rule dfns, not %d", len(tokRules))
 	}
+}
+
+func Test_Tokenizer(t *testing.T) {
+	lines, _ := loadFile("../fixtures/macro.mg")
+	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
+	expected := 63
+	tokens := tkn.tokenize()
 	for _, tk := range tokens {
 		t.Log(tk)
+	}
+	if expected != len(tokens) {
+		t.Fatalf("expected %d tokens, but got %d", expected, len(tokens))
 	}
 }
 
@@ -43,6 +53,9 @@ func Test_TokenizerPosition(t *testing.T) {
 	pos.advanceLine(1)
 	if pos.currentLine != 1 {
 		t.Fatalf("advance should move line to 1, got %d", pos.currentLine)
+	}
+	if pos.currentChar != 1 {
+		t.Fatalf("advance line should move char to 1, got %d", pos.currentChar)
 	}
 
 	sp := pos.getPosition()
