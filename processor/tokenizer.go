@@ -218,7 +218,16 @@ func filterTokens(tokens []token, expected typedefs.TokenType) []token {
 type tokenizer struct {
 	tokens []token
 	content string
-	position tokenizerPosition
+	position *tokenizerPosition
+}
+
+func newTokenizer(source string, content string) *tokenizer {
+	pos := tokenizerPosition{ source, 0, 0, 0 }
+	tkn := tokenizer{
+		content: content,
+		position: &pos,
+	}
+	return &tkn
 }
 
 type tokenizerPosition struct {
@@ -229,13 +238,13 @@ type tokenizerPosition struct {
 }
 
 func (tp *tokenizerPosition)advanceCursor(chr int) {
-	tp.cursor += 1
+	tp.cursor += chr
 }
 func (tp *tokenizerPosition)advanceChar(chr int) {
-	tp.currentChar += 1
+	tp.currentChar += chr
 }
 func (tp *tokenizerPosition)advanceLine(chr int) {
-	tp.currentLine += 1
+	tp.currentLine += chr
 }
 func (tp *tokenizerPosition)advance(chr int) {
 	tp.advanceCursor(chr)
