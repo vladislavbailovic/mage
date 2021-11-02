@@ -97,6 +97,21 @@ func (t *tokenizer)processCommand(word string) string {
 	return ""
 }
 
+func (t *tokenizer)processMacroDfn(word string) string {
+	content := t.content + " \n"
+	kwLen := len("macro")
+	// Macro definition
+	t.position.advanceCursor(kwLen + 1)
+	macro := consumeUntil("\n", content, t.position.cursor)
+	t.addNewToken(typedefs.TOKEN_MACRO_DFN_OPEN, "")
+	for _, tk := range t.tokenizeSubstring(macro) {
+		t.addToken(tk)
+	}
+	t.addNewToken(typedefs.TOKEN_MACRO_DFN_CLOSE, "")
+	t.position.advanceCursor(len(macro))
+	return ""
+}
+
 func (t *tokenizer)tokenize() []token {
 	content := t.content + " \n"
 	word := ""
@@ -119,16 +134,7 @@ func (t *tokenizer)tokenize() []token {
 		if len(content) >= matchEnd {
 			match := string(content[t.position.cursor:matchEnd])
 			if kw == match {
-				// Macro definition
-				t.position.advanceCursor(kwLen + 1)
-				macro := consumeUntil("\n", content, t.position.cursor)
-				t.addNewToken(typedefs.TOKEN_MACRO_DFN_OPEN, "")
-				for _, tk := range t.tokenizeSubstring(macro) {
-					t.addToken(tk)
-				}
-				t.addNewToken(typedefs.TOKEN_MACRO_DFN_CLOSE, "")
-				t.position.advanceCursor(len(macro))
-				word = ""
+				t.processMacroDfn(word)
 				continue
 			}
 		}
