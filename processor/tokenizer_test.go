@@ -28,6 +28,42 @@ func Test_Tokenizer(t *testing.T) {
 	}
 }
 
+func Test_TokenizerSetsProperPositions_MacroDfn(t *testing.T) {
+	lines, _ := loadFile("../fixtures/macro.mg")
+	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
+	tkn.tokenize()
+	for _,tk := range tkn.filter(typedefs.TOKEN_MACRO_DFN_OPEN) {
+		if tk.pos.Char != 1 {
+			t.Fatalf("macro dfn should start at 1, got %d", tk.pos.Char)
+		}
+	}
+	prev := 0
+	for _,tk := range tkn.filter(typedefs.TOKEN_MACRO_DFN_CLOSE) {
+		if tk.pos.Line <= prev {
+			t.Fatalf("macro dfn should end after %d, got %d", prev, tk.pos.Line)
+		}
+		prev += 1
+	}
+}
+
+func Test_TokenizerSetsProperPositions_Command(t *testing.T) {
+	lines, _ := loadFile("../fixtures/macro.mg")
+	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
+	tkn.tokenize()
+	for _, tk := range tkn.filter(typedefs.TOKEN_COMMAND_OPEN) {
+		if tk.pos.Char != 1 {
+			t.Fatalf("command should start at 1, got %d", tk.pos.Char)
+		}
+	}
+	prev := 0
+	for _,tk := range tkn.filter(typedefs.TOKEN_COMMAND_CLOSE) {
+		if tk.pos.Line <= prev {
+			t.Fatalf("command should end after %d, got %d", prev, tk.pos.Line)
+		}
+		prev += 1
+	}
+}
+
 func Test_TokenizerPosition(t *testing.T) {
 	pos := tokenizerPosition{"test", 0, 0, 0 }
 	pos.advance(161)
