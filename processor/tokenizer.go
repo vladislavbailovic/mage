@@ -112,6 +112,23 @@ func (t *tokenizer)processMacroDfn(word string) string {
 	return ""
 }
 
+func (t *tokenizer)processMacroCall(word string) string {
+	content := t.content + " \n"
+	if len(word) > 0 {
+		t.addNewToken(typedefs.TOKEN_WORD, word)
+	}
+	// Macro call
+	t.position.advanceCursor(2)
+	macro := consumeUntil(")", content, t.position.cursor)
+	t.addNewToken(typedefs.TOKEN_MACRO_CALL_OPEN, "")
+	for _, tk := range t.tokenizeSubstring(macro) {
+		t.addToken(tk)
+	}
+	t.addNewToken(typedefs.TOKEN_MACRO_CALL_CLOSE, "")
+	t.position.advance(len(macro)+1)
+	return ""
+}
+
 func (t *tokenizer)tokenize() []token {
 	content := t.content + " \n"
 	word := ""
@@ -134,7 +151,7 @@ func (t *tokenizer)tokenize() []token {
 		if len(content) >= matchEnd {
 			match := string(content[t.position.cursor:matchEnd])
 			if kw == match {
-				t.processMacroDfn(word)
+				word = t.processMacroDfn(word)
 				continue
 			}
 		}
@@ -145,20 +162,7 @@ func (t *tokenizer)tokenize() []token {
 		if len(content) >= matchEnd {
 			match := string(content[t.position.cursor:matchEnd])
 			if kw == match {
-				if len(word) > 0 {
-					t.addNewToken(typedefs.TOKEN_WORD, word)
-					word = ""
-				}
-				// Macro call
-				t.position.advanceCursor(2)
-				macro := consumeUntil(")", content, t.position.cursor)
-				t.addNewToken(typedefs.TOKEN_MACRO_CALL_OPEN, "")
-				for _, tk := range t.tokenizeSubstring(macro) {
-					t.addToken(tk)
-				}
-				t.addNewToken(typedefs.TOKEN_MACRO_CALL_CLOSE, "")
-				t.position.advance(len(macro)+1)
-				word = ""
+				word = t.processMacroCall(word)
 				continue
 			}
 		}
