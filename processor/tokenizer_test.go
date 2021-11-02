@@ -35,6 +35,14 @@ func Test_Tokenizer(t *testing.T) {
 	if expected != len(tokens) {
 		t.Fatalf("expected %d tokens, but got %d", expected, len(tokens))
 	}
+	tokMacros := filterTokens(tokens, typedefs.TOKEN_MACRO_DFN_OPEN)
+	if 5 != len(tokMacros) {
+		t.Fatalf("there should be 5 macros, not %d", len(tokMacros))
+	}
+	tokRules := filterTokens(tokens, typedefs.TOKEN_RULE_OPEN)
+	if 2 != len(tokRules) {
+		t.Fatalf("there should be 2 rule dfns, not %d", len(tokRules))
+	}
 }
 
 func Test_TokenizerPosition(t *testing.T) {

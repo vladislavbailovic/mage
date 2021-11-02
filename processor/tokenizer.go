@@ -359,30 +359,22 @@ func (t *tokenizer)tokenize() []token {
 			}
 		}
 
-		// if ":" == string(content[pos]) {
-		// 	// Rule definition
-		// 	name := consumeBackUntil("\n", content, pos-1)
-		// 	dependencies := consumeUntil("\n", content, pos+1)
-		// 	allTokens = append(allTokens, token{
-		// 		typedefs.SourcePosition{file, currentLine, currentChar + 1},
-		// 		typedefs.TOKEN_RULE_OPEN,
-		// 		"",
-		// 	})
-		// 	for _, tk := range tokenize(file, name, currentLine, currentChar) {
-		// 		allTokens = append(allTokens, tk)
-		// 	}
-		// 	for _, tk := range tokenize(file, dependencies, currentLine, currentChar) {
-		// 		allTokens = append(allTokens, tk)
-		// 	}
-		// 	allTokens = append(allTokens, token{
-		// 		typedefs.SourcePosition{file, currentLine, currentChar + 1},
-		// 		typedefs.TOKEN_RULE_CLOSE,
-		// 		"",
-		// 	})
-		// 	pos += len(dependencies) + 1
-		// 	word = ""
-		// 	continue
-		// }
+		if ":" == chr {
+			// Rule definition
+			name := consumeBackUntil("\n", content, t.position.cursor-1)
+			dependencies := consumeUntil("\n", content, t.position.cursor+1)
+			t.addNewToken(typedefs.TOKEN_RULE_OPEN, "")
+			for _, tk := range t.getSubtokens(name) {
+				t.addToken(tk)
+			}
+			for _, tk := range t.getSubtokens(dependencies) {
+				t.addToken(tk)
+			}
+			t.addNewToken(typedefs.TOKEN_RULE_CLOSE, "")
+			t.position.advance(len(dependencies)+1)
+			word = ""
+			continue
+		}
 
 		if " " == chr && len(word) > 0 {
 			t.addNewToken(typedefs.TOKEN_WORD, word)
