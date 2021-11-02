@@ -129,6 +129,23 @@ func (t *tokenizer)processMacroCall(word string) string {
 	return ""
 }
 
+func (t *tokenizer)processRule(word string) string {
+	content := t.content + " \n"
+		// Rule definition
+		name := consumeBackUntil("\n", content, t.position.cursor-1)
+		dependencies := consumeUntil("\n", content, t.position.cursor+1)
+		t.addNewToken(typedefs.TOKEN_RULE_OPEN, "")
+		for _, tk := range t.tokenizeSubstring(name) {
+			t.addToken(tk)
+		}
+		for _, tk := range t.tokenizeSubstring(dependencies) {
+			t.addToken(tk)
+		}
+		t.addNewToken(typedefs.TOKEN_RULE_CLOSE, "")
+		t.position.advance(len(dependencies)+1)
+		return ""
+}
+
 func (t *tokenizer)tokenize() []token {
 	content := t.content + " \n"
 	word := ""
@@ -168,19 +185,7 @@ func (t *tokenizer)tokenize() []token {
 		}
 
 		if ":" == chr {
-			// Rule definition
-			name := consumeBackUntil("\n", content, t.position.cursor-1)
-			dependencies := consumeUntil("\n", content, t.position.cursor+1)
-			t.addNewToken(typedefs.TOKEN_RULE_OPEN, "")
-			for _, tk := range t.tokenizeSubstring(name) {
-				t.addToken(tk)
-			}
-			for _, tk := range t.tokenizeSubstring(dependencies) {
-				t.addToken(tk)
-			}
-			t.addNewToken(typedefs.TOKEN_RULE_CLOSE, "")
-			t.position.advance(len(dependencies)+1)
-			word = ""
+			word = t.processRule(word)
 			continue
 		}
 
