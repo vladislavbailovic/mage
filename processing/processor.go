@@ -5,10 +5,18 @@ package processing
 
 import (
 	"fmt"
+	"path"
 	"strings"
 
 	"mage/typedefs"
 )
+
+func ProcessFile(filepath string) (map[string]typedefs.TaskDefinition, error) {
+	lines, _ := loadFile(filepath)
+	tkn := newTokenizer(path.Base(filepath), strings.Join(lines, "\n"))
+	tokens, _ := preprocess(tkn.tokenize())
+	return process(tokens)
+}
 
 func process(tokens []typedefs.Token) (map[string]typedefs.TaskDefinition, error) {
 	result := map[string]typedefs.TaskDefinition{}

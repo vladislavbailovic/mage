@@ -1,4 +1,4 @@
-package ruleset
+package evaluation
 
 import (
 	"os"
@@ -7,7 +7,7 @@ import (
 )
 
 type executionItem struct {
-	pos typedefs.SourcePosition
+	pos  typedefs.SourcePosition
 	name string
 	spec []string
 }
@@ -18,20 +18,20 @@ type task interface {
 	getCommands() []string
 }
 
-type ruleTask struct { executionItem }
-type fileTask struct { executionItem }
+type ruleTask struct{ executionItem }
+type fileTask struct{ executionItem }
 
-func (r executionItem)getName() string {
-	return r.name[:len(r.name)-1]
+func (r executionItem) getName() string {
+	return r.name
 }
-func (r executionItem)getCommands() []string {
+func (r executionItem) getCommands() []string {
 	return r.spec
 }
 
-func (t ruleTask)getAge() int64 {
+func (t ruleTask) getAge() int64 {
 	return 0
 }
-func (t fileTask)getAge() int64 {
+func (t fileTask) getAge() int64 {
 	fpath := t.name[:len(t.name)-1]
 	f, err := os.Stat(fpath)
 	if err != nil {

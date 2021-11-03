@@ -1,21 +1,21 @@
-package ruleset
+package evaluation
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"os"
 	"time"
-	"io/ioutil"
-	"encoding/json"
 )
 
 type epoch int64
 
 type record struct {
-	Name string
+	Name      string
 	Timestamp epoch
 }
 
 type recordStore struct {
-	path string
+	path    string
 	records map[string]record
 }
 
@@ -31,16 +31,16 @@ func NewRecordStore(path string) *recordStore {
 	var records map[string]record
 	json.Unmarshal(bytes, &records)
 
-	store := recordStore{ path, records }
+	store := recordStore{path, records}
 	return &store
 }
 
-func (rs *recordStore)RecordTime(entry string) {
-	r := record{entry, epoch(time.Now().Unix()) }
+func (rs *recordStore) RecordTime(entry string) {
+	r := record{entry, epoch(time.Now().Unix())}
 	rs.records[entry] = r
 }
 
-func (rs recordStore)GetTime(entry string) epoch {
+func (rs recordStore) GetTime(entry string) epoch {
 	r, ok := rs.records[entry]
 	if !ok {
 		return epoch(0)
@@ -48,7 +48,7 @@ func (rs recordStore)GetTime(entry string) epoch {
 	return r.Timestamp
 }
 
-func (rs recordStore)Save() error {
+func (rs recordStore) Save() error {
 	content, err := json.MarshalIndent(rs.records, "", " ")
 	if err != nil {
 		return err

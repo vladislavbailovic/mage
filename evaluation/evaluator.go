@@ -1,4 +1,4 @@
-package ruleset
+package evaluation
 
 // import (
 // 	"fmt"
