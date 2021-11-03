@@ -15,19 +15,59 @@ type macroDefinition struct {
 }
 
 func preprocess(tokens []token) ([]token, error) {
-	mds, err := getMacroDefinitions(tokens)
+	macros, err := getMacroDefinitions(tokens)
 	if err != nil {
 		return nil, err
 	}
+	result := []token{}
 
-	fmt.Println("----- before -----")
-	dbgdefs(mds)
+	for i := 0; i < len(tokens); i++ {
+		if tokens[i].kind == typedefs.TOKEN_MACRO_DFN_OPEN {
+			// SKip over macro definitions, already have those
+			for tokens[i].kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
+				i += 1
+			}
+			i += 1
+			continue
+		}
+
+		if tokens[i].kind == typedefs.TOKEN_MACRO_CALL_OPEN {
+			i += 1
+			if tokens[i].kind != typedefs.TOKEN_WORD {
+				panic("expected word")
+			}
+			if tokens[i+1].kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
+				panic("macro not closed")
+			}
+			macroName := tokens[i].value
+			macro, ok := macros[macroName]
+			if !ok {
+				panic("unknown macro")
+			}
+			for _, tk := range macro.tokens {
+				result = append(result, tk)
+			}
+			i += 1
+			continue
+		}
+
+		result = append(result, tokens[i])
+	}
+
+	return result, nil
+}
+
+func getMacroDefinitions(tokens []token) (map[string]macroDefinition, error) {
+	dfns, err := getRawMacroDefinitions(tokens)
+	if err != nil {
+		return nil, err
+	}
 
 	// Prepare macro definitions by expanding calls
 	recursionCounter := 0
 	for recursionCounter < MACRO_EXPANSION_RECURSE_LIMIT {
 		didReplacement := false
-		for name, md := range mds {
+		for name, md := range dfns {
 			for idx, token := range md.tokens {
 				if token.kind != typedefs.TOKEN_MACRO_CALL_OPEN {
 					continue
@@ -37,7 +77,7 @@ func preprocess(tokens []token) ([]token, error) {
 					panic("macro call has to be a word")
 				}
 
-				macro, ok := mds[nameTok.value]
+				macro, ok := dfns[nameTok.value]
 				if !ok {
 					panic("can't find token: " + nameTok.value)
 				}
@@ -50,7 +90,7 @@ func preprocess(tokens []token) ([]token, error) {
 				tks := append(md.tokens[0:idx], macro.tokens...)
 				tks = append(tks, md.tokens[idx+3:]...)
 				md.tokens = tks
-				mds[name] = md
+				dfns[name] = md
 				didReplacement = true
 			}
 		}
@@ -60,10 +100,7 @@ func preprocess(tokens []token) ([]token, error) {
 		}
 	}
 
-	fmt.Println("----- after -----")
-	dbgdefs(mds)
-
-	return tokens, nil
+	return dfns, nil
 }
 
 func dbgdefs(mds map[string]macroDefinition) {
@@ -75,7 +112,7 @@ func dbgdefs(mds map[string]macroDefinition) {
 	}
 }
 
-func getMacroDefinitions(tokens []token) (map[string]macroDefinition, error) {
+func getRawMacroDefinitions(tokens []token) (map[string]macroDefinition, error) {
 	result := map[string]macroDefinition{}
 
 	for i := 0; i < len(tokens); i++ {
