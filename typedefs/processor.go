@@ -17,5 +17,5 @@ type TaskDefinition struct {
 type MacroDefinition struct {
 	Pos SourcePosition
 	Name string
-	Value string
+	Tokens []Token
 }

@@ -7,13 +7,6 @@ import (
 
 const MACRO_EXPANSION_RECURSE_LIMIT = 10
 
-
-type macroDefinition struct {
-	Pos typedefs.SourcePosition
-	Name string
-	tokens []typedefs.Token
-}
-
 func preprocess(tokens []typedefs.Token) ([]typedefs.Token, error) {
 	macros, err := getMacroDefinitions(tokens)
 	if err != nil {
@@ -45,7 +38,7 @@ func preprocess(tokens []typedefs.Token) ([]typedefs.Token, error) {
 			if !ok {
 				panic("unknown macro")
 			}
-			for _, tk := range macro.tokens {
+			for _, tk := range macro.Tokens {
 				result = append(result, tk)
 			}
 			i += 1
@@ -58,7 +51,7 @@ func preprocess(tokens []typedefs.Token) ([]typedefs.Token, error) {
 	return result, nil
 }
 
-func getMacroDefinitions(tokens []typedefs.Token) (map[string]macroDefinition, error) {
+func getMacroDefinitions(tokens []typedefs.Token) (map[string]typedefs.MacroDefinition, error) {
 	dfns, err := getRawMacroDefinitions(tokens)
 	if err != nil {
 		return nil, err
@@ -69,11 +62,11 @@ func getMacroDefinitions(tokens []typedefs.Token) (map[string]macroDefinition, e
 	for recursionCounter < MACRO_EXPANSION_RECURSE_LIMIT {
 		didReplacement := false
 		for name, md := range dfns {
-			for idx, token := range md.tokens {
+			for idx, token := range md.Tokens {
 				if token.Kind != typedefs.TOKEN_MACRO_CALL_OPEN {
 					continue
 				}
-				nameTok := md.tokens[idx+1]
+				nameTok := md.Tokens[idx+1]
 				if nameTok.Kind != typedefs.TOKEN_WORD {
 					panic("macro call has to be a word")
 				}
@@ -83,14 +76,14 @@ func getMacroDefinitions(tokens []typedefs.Token) (map[string]macroDefinition, e
 					panic("can't find token: " + nameTok.Value)
 				}
 
-				closeTok := md.tokens[idx+2]
+				closeTok := md.Tokens[idx+2]
 				if closeTok.Kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
 					panic("macro call not closed off")
 				}
 
-				tks := append(md.tokens[0:idx], macro.tokens...)
-				tks = append(tks, md.tokens[idx+3:]...)
-				md.tokens = tks
+				tks := append(md.Tokens[0:idx], macro.Tokens...)
+				tks = append(tks, md.Tokens[idx+3:]...)
+				md.Tokens = tks
 				dfns[name] = md
 				didReplacement = true
 			}
@@ -104,17 +97,8 @@ func getMacroDefinitions(tokens []typedefs.Token) (map[string]macroDefinition, e
 	return dfns, nil
 }
 
-func dbgdefs(mds map[string]macroDefinition) {
-	for n,m := range mds {
-		fmt.Printf("- [%s]:\n", n)
-		for _, t := range m.tokens {
-			fmt.Printf("\t> [%s] (%s)\n", toktype(t.Kind), t.Value)
-		}
-	}
-}
-
-func getRawMacroDefinitions(tokens []typedefs.Token) (map[string]macroDefinition, error) {
-	result := map[string]macroDefinition{}
+func getRawMacroDefinitions(tokens []typedefs.Token) (map[string]typedefs.MacroDefinition, error) {
+	result := map[string]typedefs.MacroDefinition{}
 
 	for i := 0; i < len(tokens); i++ {
 		if tokens[i].Kind != typedefs.TOKEN_MACRO_DFN_OPEN {
@@ -149,7 +133,7 @@ func getRawMacroDefinitions(tokens []typedefs.Token) (map[string]macroDefinition
 			valueTokens = append(valueTokens, tokens[j])
 		}
 
-		result[nameToken.Value] = macroDefinition{
+		result[nameToken.Value] = typedefs.MacroDefinition{
 			nameToken.Pos,
 			nameToken.Value,
 			valueTokens,
@@ -161,26 +145,3 @@ func getRawMacroDefinitions(tokens []typedefs.Token) (map[string]macroDefinition
 	return result, nil
 }
 
-func toktype(kind typedefs.TokenType) string {
-	switch(kind) {
-	case typedefs.TOKEN_WORD:
-		return "word"
-	case typedefs.TOKEN_MACRO_DFN_OPEN:
-		return "macro dfn open"
-	case typedefs.TOKEN_MACRO_DFN_CLOSE:
-		return "macro dfn CLOSE"
-	case typedefs.TOKEN_MACRO_CALL_OPEN:
-		return "macro call open"
-	case typedefs.TOKEN_MACRO_CALL_CLOSE:
-		return "macro call CLOSE"
-	case typedefs.TOKEN_RULE_OPEN:
-		return "rule open"
-	case typedefs.TOKEN_RULE_CLOSE:
-		return "rule close"
-	case typedefs.TOKEN_COMMAND_OPEN:
-		return "command open"
-	case typedefs.TOKEN_COMMAND_CLOSE:
-		return "command close"
-	}
-	return "wut"
-}
