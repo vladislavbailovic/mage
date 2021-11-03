@@ -22,3 +22,15 @@ func Test_GetFileMtime(t *testing.T) {
 		t.Fatalf("mtime of valid file should NOT be 0")
 	}
 }
+
+func Test_LoadFile(t *testing.T) {
+	_, err := LoadFile("no such file")
+	if err == nil {
+		t.Fatalf("should error out when loading invalid file")
+	}
+
+	stuff, _ := LoadFile("../fixtures/simple.mg")
+	if len(stuff) <= 0 {
+		t.Fatalf("should have loaded valid file")
+	}
+}
