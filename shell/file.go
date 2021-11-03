@@ -3,29 +3,29 @@ package shell
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
-func FileExists(filepath string) bool {
-	_, err := os.Stat(filepath)
+func FileExists(fpath string) bool {
+	_, err := os.Stat(fpath)
 	return err == nil
 }
 
-func GetFileMtime(filepath string) int64 {
-	info, err := os.Stat(filepath)
+func GetFileMtime(fpath string) int64 {
+	info, err := os.Stat(fpath)
 	if err != nil {
 		return 0
 	}
 	return info.ModTime().Unix()
 }
 
-func LoadFile(filepath string) (string, error) {
-	fp, err := os.Open(filepath)
+func LoadFile(fpath string) (string, error) {
+	fp, err := os.Open(fpath)
 	if err != nil {
-		return "", errors.New("Error reading file: " + filepath)
+		return "", errors.New("Error reading file: " + fpath)
 	}
 	defer fp.Close()
 
@@ -37,8 +37,10 @@ func LoadFile(filepath string) (string, error) {
 	return strings.Join(lines, "\n"), nil
 }
 
-func PathRelativeTo(filepath string, relativeTo string) string {
-	fmt.Println(os.Getwd())
-	fmt.Println(path.Dir(relativeTo))
-	return filepath
+func PathRelativeTo(fpath string, relativeTo string) string {
+	dirpath, err := filepath.Abs(path.Dir(relativeTo))
+	if err != nil {
+		return fpath
+	}
+	return path.Join(dirpath, fpath)
 }

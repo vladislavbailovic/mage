@@ -1,4 +1,4 @@
-:include ../fixtures/included.mg
+:include included.mg
 
 root: feat3 feat2 feat1
 	echo "All done!"
