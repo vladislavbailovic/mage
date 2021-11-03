@@ -4,6 +4,7 @@ package processing
 // intermediate ruleset representation
 
 import (
+	"fmt"
 	"strings"
 
 	"mage/typedefs"
@@ -56,6 +57,10 @@ func process(tokens []typedefs.Token) (map[string]typedefs.TaskDefinition, error
 				return nil, tokenError(tokens[i], "rule name has to be a word")
 			}
 			ruleName = tokens[i].Value
+			old, ok := result[ruleName]
+			if ok {
+				return nil, tokenError(tokens[i], fmt.Sprintf("rule [%s] already exists (defined at %s: %d, %d)", ruleName, old.Pos.File, old.Pos.Line, old.Pos.Char))
+			}
 			i += 1
 			for j := i; j < len(tokens); j++ {
 				if tokens[j].Kind == typedefs.TOKEN_RULE_CLOSE {
