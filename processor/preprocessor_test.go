@@ -8,12 +8,16 @@ import (
 func Test_Preprocessor(t *testing.T) {
 	lines, _ := loadFile("../fixtures/macro.mg")
 	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
-	tokens, err := preprocess(tkn.tokenize())
+	rawTokens := tkn.tokenize()
+	tokens, err := preprocess(rawTokens)
 	if err != nil {
 		t.Fatalf("preprocessing error: %s", err)
 	}
 	for _,tk := range tokens {
 		t.Logf("> %s (%s)\n", tk.value, toktype(tk.kind))
+	}
+	if len(tokens) >= len(rawTokens) {
+		t.Fatalf("expected macros to be removed from tokens, got %d", len(tokens))
 	}
 }
 

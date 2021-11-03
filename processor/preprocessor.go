@@ -32,6 +32,7 @@ func preprocess(tokens []token) ([]token, error) {
 		}
 
 		if tokens[i].kind == typedefs.TOKEN_MACRO_CALL_OPEN {
+			// Expand macro calls
 			i += 1
 			if tokens[i].kind != typedefs.TOKEN_WORD {
 				panic("expected word")
