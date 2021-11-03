@@ -11,36 +11,36 @@ const MACRO_EXPANSION_RECURSE_LIMIT = 10
 type macroDefinition struct {
 	Pos typedefs.SourcePosition
 	Name string
-	tokens []token
+	tokens []typedefs.Token
 }
 
-func preprocess(tokens []token) ([]token, error) {
+func preprocess(tokens []typedefs.Token) ([]typedefs.Token, error) {
 	macros, err := getMacroDefinitions(tokens)
 	if err != nil {
 		return nil, err
 	}
-	result := []token{}
+	result := []typedefs.Token{}
 
 	for i := 0; i < len(tokens); i++ {
-		if tokens[i].kind == typedefs.TOKEN_MACRO_DFN_OPEN {
+		if tokens[i].Kind == typedefs.TOKEN_MACRO_DFN_OPEN {
 			// SKip over macro definitions, already have those
-			for tokens[i].kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
+			for tokens[i].Kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
 				i += 1
 			}
 			i += 1
 			continue
 		}
 
-		if tokens[i].kind == typedefs.TOKEN_MACRO_CALL_OPEN {
+		if tokens[i].Kind == typedefs.TOKEN_MACRO_CALL_OPEN {
 			// Expand macro calls
 			i += 1
-			if tokens[i].kind != typedefs.TOKEN_WORD {
+			if tokens[i].Kind != typedefs.TOKEN_WORD {
 				panic("expected word")
 			}
-			if tokens[i+1].kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
+			if tokens[i+1].Kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
 				panic("macro not closed")
 			}
-			macroName := tokens[i].value
+			macroName := tokens[i].Value
 			macro, ok := macros[macroName]
 			if !ok {
 				panic("unknown macro")
@@ -58,7 +58,7 @@ func preprocess(tokens []token) ([]token, error) {
 	return result, nil
 }
 
-func getMacroDefinitions(tokens []token) (map[string]macroDefinition, error) {
+func getMacroDefinitions(tokens []typedefs.Token) (map[string]macroDefinition, error) {
 	dfns, err := getRawMacroDefinitions(tokens)
 	if err != nil {
 		return nil, err
@@ -70,21 +70,21 @@ func getMacroDefinitions(tokens []token) (map[string]macroDefinition, error) {
 		didReplacement := false
 		for name, md := range dfns {
 			for idx, token := range md.tokens {
-				if token.kind != typedefs.TOKEN_MACRO_CALL_OPEN {
+				if token.Kind != typedefs.TOKEN_MACRO_CALL_OPEN {
 					continue
 				}
 				nameTok := md.tokens[idx+1]
-				if nameTok.kind != typedefs.TOKEN_WORD {
+				if nameTok.Kind != typedefs.TOKEN_WORD {
 					panic("macro call has to be a word")
 				}
 
-				macro, ok := dfns[nameTok.value]
+				macro, ok := dfns[nameTok.Value]
 				if !ok {
-					panic("can't find token: " + nameTok.value)
+					panic("can't find token: " + nameTok.Value)
 				}
 
 				closeTok := md.tokens[idx+2]
-				if closeTok.kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
+				if closeTok.Kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
 					panic("macro call not closed off")
 				}
 
@@ -108,50 +108,50 @@ func dbgdefs(mds map[string]macroDefinition) {
 	for n,m := range mds {
 		fmt.Printf("- [%s]:\n", n)
 		for _, t := range m.tokens {
-			fmt.Printf("\t> [%s] (%s)\n", toktype(t.kind), t.value)
+			fmt.Printf("\t> [%s] (%s)\n", toktype(t.Kind), t.Value)
 		}
 	}
 }
 
-func getRawMacroDefinitions(tokens []token) (map[string]macroDefinition, error) {
+func getRawMacroDefinitions(tokens []typedefs.Token) (map[string]macroDefinition, error) {
 	result := map[string]macroDefinition{}
 
 	for i := 0; i < len(tokens); i++ {
-		if tokens[i].kind != typedefs.TOKEN_MACRO_DFN_OPEN {
+		if tokens[i].Kind != typedefs.TOKEN_MACRO_DFN_OPEN {
 			continue
 		}
 		i += 1
 		nameToken := tokens[i]
-		if nameToken.kind != typedefs.TOKEN_WORD {
+		if nameToken.Kind != typedefs.TOKEN_WORD {
 			return nil, fmt.Errorf(
 				"ERROR %s %d %d: macro name missing",
-				nameToken.pos.File,
-				nameToken.pos.Line,
-				nameToken.pos.Char,
+				nameToken.Pos.File,
+				nameToken.Pos.Line,
+				nameToken.Pos.Char,
 			)
 		}
 		i += 1
 
-		valueTokens := []token{}
+		valueTokens := []typedefs.Token{}
 		for j := i; j < len(tokens); j++ {
-			if tokens[j].kind == typedefs.TOKEN_MACRO_DFN_CLOSE {
+			if tokens[j].Kind == typedefs.TOKEN_MACRO_DFN_CLOSE {
 				break
 			}
-			if tokens[j].kind != typedefs.TOKEN_WORD && tokens[j].kind != typedefs.TOKEN_MACRO_CALL_OPEN && tokens[j].kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
+			if tokens[j].Kind != typedefs.TOKEN_WORD && tokens[j].Kind != typedefs.TOKEN_MACRO_CALL_OPEN && tokens[j].Kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
 				return nil, fmt.Errorf(
 					"ERROR %s %d %d: unexpected macro content; only words and macro calls are allowed but we got %v",
-					tokens[j].pos.File,
-					tokens[j].pos.Line,
-					tokens[j].pos.Char,
-					toktype(tokens[j].kind),
+					tokens[j].Pos.File,
+					tokens[j].Pos.Line,
+					tokens[j].Pos.Char,
+					toktype(tokens[j].Kind),
 				)
 			}
 			valueTokens = append(valueTokens, tokens[j])
 		}
 
-		result[nameToken.value] = macroDefinition{
-			nameToken.pos,
-			nameToken.value,
+		result[nameToken.Value] = macroDefinition{
+			nameToken.Pos,
+			nameToken.Value,
 			valueTokens,
 		}
 

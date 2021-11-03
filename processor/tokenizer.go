@@ -24,11 +24,6 @@ func loadFile(fpath string) ([]string, error) {
 }
 
 
-type token struct {
-	pos typedefs.SourcePosition
-	kind typedefs.TokenType
-	value string
-}
 
 type tokenizerPosition struct {
 	source string
@@ -60,7 +55,7 @@ func (tp tokenizerPosition)getPosition() typedefs.SourcePosition {
 }
 
 type tokenizer struct {
-	tokens []token
+	tokens []typedefs.Token
 	content string
 	position *tokenizerPosition
 }
@@ -75,18 +70,18 @@ func newTokenizer(source string, content string) *tokenizer {
 }
 
 func (t *tokenizer)addNewToken(kind typedefs.TokenType, value string) {
-	t.addToken(token{
+	t.addToken(typedefs.Token{
 		t.position.getPosition(),
 		kind,
 		value,
 	})
 }
 
-func (t *tokenizer)addToken(tk token) {
+func (t *tokenizer)addToken(tk typedefs.Token) {
 	t.tokens = append(t.tokens, tk)
 }
 
-func (t *tokenizer)tokenizeSubstring(substr string) []token {
+func (t *tokenizer)tokenizeSubstring(substr string) []typedefs.Token {
 	subt := newTokenizer(t.position.source, substr)
 	subt.position.currentLine = t.position.currentLine
 	subt.position.currentChar = t.position.currentChar
@@ -167,7 +162,7 @@ func (t *tokenizer)processRule(word string) string {
 	return ""
 }
 
-func (t *tokenizer)tokenize() []token {
+func (t *tokenizer)tokenize() []typedefs.Token {
 	content := t.content + " \n"
 	word := ""
 	for t.position.cursor < len(content) - 1 {
@@ -225,10 +220,10 @@ func (t *tokenizer)tokenize() []token {
 	return t.tokens
 }
 
-func (t tokenizer)filter(expected typedefs.TokenType) []token {
-	result := []token{}
+func (t tokenizer)filter(expected typedefs.TokenType) []typedefs.Token {
+	result := []typedefs.Token{}
 	for _, tk := range t.tokens {
-		if expected != tk.kind {
+		if expected != tk.Kind {
 			continue
 		}
 		result = append(result, tk)

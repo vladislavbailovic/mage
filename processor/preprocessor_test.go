@@ -14,7 +14,7 @@ func Test_Preprocessor(t *testing.T) {
 		t.Fatalf("preprocessing error: %s", err)
 	}
 	for _,tk := range tokens {
-		t.Logf("> %s (%s)\n", tk.value, toktype(tk.kind))
+		t.Logf("> %s (%s)\n", tk.Value, toktype(tk.Kind))
 	}
 	if len(tokens) >= len(rawTokens) {
 		t.Fatalf("expected macros to be removed from tokens, got %d", len(tokens))

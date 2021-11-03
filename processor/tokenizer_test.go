@@ -110,15 +110,15 @@ func Test_WordPositions(t *testing.T) {
 	}
 	current := 0
 	for idx,tk := range tokens {
-		if typedefs.TOKEN_WORD != tk.kind {
+		if typedefs.TOKEN_WORD != tk.Kind {
 			continue
 		}
 		e := expecteds[current]
-		if tk.pos.Line != e[0] {
-			t.Fatalf("expected %s to be on line %d, but got %d", tk.value, e[0], tk.pos.Line)
+		if tk.Pos.Line != e[0] {
+			t.Fatalf("expected %s to be on line %d, but got %d", tk.Value, e[0], tk.Pos.Line)
 		}
-		if tk.pos.Char != e[1] {
-			t.Fatalf("expected [%s](%d) to start on char %d, but got %d", tk.value, idx, e[1], tk.pos.Char)
+		if tk.Pos.Char != e[1] {
+			t.Fatalf("expected [%s](%d) to start on char %d, but got %d", tk.Value, idx, e[1], tk.Pos.Char)
 		}
 		current++
 		if current > len(expecteds) - 1 {
@@ -132,14 +132,14 @@ func Test_TokenizerSetsProperPositions_MacroDfn(t *testing.T) {
 	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
 	tkn.tokenize()
 	for _,tk := range tkn.filter(typedefs.TOKEN_MACRO_DFN_OPEN) {
-		if tk.pos.Char != 7 {
-			t.Fatalf("macro dfn should start at 7 (because keyword gets dropped), got %d", tk.pos.Char)
+		if tk.Pos.Char != 7 {
+			t.Fatalf("macro dfn should start at 7 (because keyword gets dropped), got %d", tk.Pos.Char)
 		}
 	}
 	prev := 0
 	for _,tk := range tkn.filter(typedefs.TOKEN_MACRO_DFN_CLOSE) {
-		if tk.pos.Line <= prev {
-			t.Fatalf("macro dfn should end after %d, got %d", prev, tk.pos.Line)
+		if tk.Pos.Line <= prev {
+			t.Fatalf("macro dfn should end after %d, got %d", prev, tk.Pos.Line)
 		}
 		prev += 1
 	}
@@ -150,14 +150,14 @@ func Test_TokenizerSetsProperPositions_Command(t *testing.T) {
 	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
 	tkn.tokenize()
 	for _, tk := range tkn.filter(typedefs.TOKEN_COMMAND_OPEN) {
-		if tk.pos.Char != 2 {
-			t.Fatalf("command should start at 2 (after tab), got %d", tk.pos.Char)
+		if tk.Pos.Char != 2 {
+			t.Fatalf("command should start at 2 (after tab), got %d", tk.Pos.Char)
 		}
 	}
 	prev := 0
 	for _,tk := range tkn.filter(typedefs.TOKEN_COMMAND_CLOSE) {
-		if tk.pos.Line <= prev {
-			t.Fatalf("command should end after %d, got %d", prev, tk.pos.Line)
+		if tk.Pos.Line <= prev {
+			t.Fatalf("command should end after %d, got %d", prev, tk.Pos.Line)
 		}
 		prev += 1
 	}
@@ -169,22 +169,22 @@ func Test_TokenizerSetsProperPositions_MacroCall(t *testing.T) {
 	tkn.tokenize()
 
 	co := tkn.filter(typedefs.TOKEN_MACRO_CALL_OPEN)
-	if co[0].pos.Char != 13 {
-		t.Fatalf("first call should start at c13, got c%d", co[0].pos.Char)
+	if co[0].Pos.Char != 13 {
+		t.Fatalf("first call should start at c13, got c%d", co[0].Pos.Char)
 	}
-	if co[0].pos.Line != 2 {
-		t.Fatalf("first call should start at l2, got l%d", co[0].pos.Line)
+	if co[0].Pos.Line != 2 {
+		t.Fatalf("first call should start at l2, got l%d", co[0].Pos.Line)
 	}
-	if co[1].pos.Char != 10 {
-		t.Fatalf("2nd call should start at c10, got c%d", co[1].pos.Char)
+	if co[1].Pos.Char != 10 {
+		t.Fatalf("2nd call should start at c10, got c%d", co[1].Pos.Char)
 	}
-	if co[1].pos.Line != 3 {
-		t.Fatalf("2nd call should start at l3, got l%d", co[1].pos.Line)
+	if co[1].Pos.Line != 3 {
+		t.Fatalf("2nd call should start at l3, got l%d", co[1].Pos.Line)
 	}
-	if co[5].pos.Line != 11 {
-		t.Fatalf("5th call should start at l11, got l%d", co[5].pos.Line)
+	if co[5].Pos.Line != 11 {
+		t.Fatalf("5th call should start at l11, got l%d", co[5].Pos.Line)
 	}
-	if co[5].pos.Char != 15 {
-		t.Fatalf("5th call should start at c15, got c%d", co[5].pos.Char)
+	if co[5].Pos.Char != 15 {
+		t.Fatalf("5th call should start at c15, got c%d", co[5].Pos.Char)
 	}
 }
