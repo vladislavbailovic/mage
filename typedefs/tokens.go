@@ -7,7 +7,7 @@ const (
 )
 
 type Token struct {
-	Pos SourcePosition
-	Kind TokenType
+	Pos   SourcePosition
+	Kind  TokenType
 	Value string
 }

@@ -96,7 +96,7 @@ func (t *tokenizer) processCommand(word string) string {
 
 func (t *tokenizer) processMacroDfn(word string) string {
 	content := t.content + " \n"
-	kwLen := len("macro")
+	kwLen := len(":macro")
 	// Macro definition
 	t.position.advance(kwLen + 1)
 	macro := consumeUntil("\n", content, t.position.cursor)
@@ -144,6 +144,21 @@ func (t *tokenizer) processRule(word string) string {
 	return ""
 }
 
+func (t *tokenizer) processIncludeCall(word string) string {
+	content := t.content + " \n"
+	kwLen := len(":include")
+	// Include definition
+	t.position.advance(kwLen + 1)
+	include := consumeUntil("\n", content, t.position.cursor)
+	t.addNewToken(typedefs.TOKEN_INCLUDE_CALL_OPEN, "")
+	for _, tk := range t.tokenizeSubstring(include) {
+		t.addToken(tk)
+	}
+	t.addNewToken(typedefs.TOKEN_INCLUDE_CALL_CLOSE, "")
+	t.position.advance(len(include))
+	return ""
+}
+
 func (t *tokenizer) tokenize() []typedefs.Token {
 	content := t.content + " \n"
 	word := ""
@@ -155,13 +170,24 @@ func (t *tokenizer) tokenize() []typedefs.Token {
 			continue
 		}
 
-		kw := "macro"
+		kw := ":macro"
 		kwLen := len(kw)
 		matchEnd := t.position.cursor + kwLen
 		if len(content) >= matchEnd {
 			match := string(content[t.position.cursor:matchEnd])
 			if kw == match {
 				word = t.processMacroDfn(word)
+				continue
+			}
+		}
+
+		kw = ":include"
+		kwLen = len(kw)
+		matchEnd = t.position.cursor + kwLen
+		if len(content) >= matchEnd {
+			match := string(content[t.position.cursor:matchEnd])
+			if kw == match {
+				word = t.processIncludeCall(word)
 				continue
 			}
 		}

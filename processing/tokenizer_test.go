@@ -45,7 +45,7 @@ func Test_Tokenizer(t *testing.T) {
 	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
 	expected := 63
 	tokens := tkn.tokenize()
-	// dbgtokens(tokens)
+	// debugTokens(tokens)
 	if expected != len(tokens) {
 		t.Fatalf("expected %d tokens, but got %d", expected, len(tokens))
 	}

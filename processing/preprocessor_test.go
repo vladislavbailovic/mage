@@ -13,7 +13,7 @@ func Test_Preprocessor(t *testing.T) {
 	if err != nil {
 		t.Fatalf("preprocessing error: %s", err)
 	}
-	// dbgtokens(tokens)
+	// debugTokens(tokens)
 	if len(tokens) >= len(rawTokens) {
 		t.Fatalf("expected macros to be removed from tokens, got %d", len(tokens))
 	}

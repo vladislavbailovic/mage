@@ -23,7 +23,7 @@ func loadFile(fpath string) ([]string, error) {
 	return lines, nil
 }
 
-func dbgdefs(mds map[string]typedefs.MacroDefinition) {
+func debugMacroDefinitions(mds map[string]typedefs.MacroDefinition) {
 	for n, m := range mds {
 		fmt.Printf("- [%s]:\n", n)
 		for _, t := range m.Tokens {
@@ -53,11 +53,11 @@ func debugTaskDefinitions(tds map[string]typedefs.TaskDefinition) {
 	}
 }
 
-func dbgtokens(tokens []typedefs.Token) {
+func debugTokens(tokens []typedefs.Token) {
 	for idx, token := range tokens {
-		fmt.Printf("%d: %s\n", idx, toktype(token.Kind))
+		fmt.Printf("%d: (%s) ", idx, toktype(token.Kind))
 		fmt.Printf(
-			"  > %s, %d:%d [%v]\n",
+			"[%s, %d:%d] [%v]\n",
 			token.Pos.File,
 			token.Pos.Line,
 			token.Pos.Char,
@@ -77,7 +77,7 @@ func toktype(kind typedefs.TokenType) string {
 	case typedefs.TOKEN_MACRO_CALL_OPEN:
 		return "macro call open"
 	case typedefs.TOKEN_MACRO_CALL_CLOSE:
-		return "macro call CLOSE"
+		return "macro call close"
 	case typedefs.TOKEN_RULE_OPEN:
 		return "rule open"
 	case typedefs.TOKEN_RULE_CLOSE:
@@ -86,8 +86,12 @@ func toktype(kind typedefs.TokenType) string {
 		return "command open"
 	case typedefs.TOKEN_COMMAND_CLOSE:
 		return "command close"
+	case typedefs.TOKEN_INCLUDE_CALL_OPEN:
+		return "include open"
+	case typedefs.TOKEN_INCLUDE_CALL_CLOSE:
+		return "include close"
 	}
-	return "wut"
+	return "UNKNOWN"
 }
 
 func tokenError(tk typedefs.Token, msg string) error {

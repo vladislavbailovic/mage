@@ -5,6 +5,7 @@ Mage - task runner in go
 TODO:
 -----
 
+- Includes
 - Spaces are significant (at least in command definitions)
 - Implement evaluation stack creation
 - Implement evaulation stack processing
