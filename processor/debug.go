@@ -32,6 +32,20 @@ func dbgdefs(mds map[string]typedefs.MacroDefinition) {
 	}
 }
 
+func dbgtaskdefs(tds map[string]typedefs.TaskDefinition) {
+	for n, t := range tds {
+		fmt.Printf(
+			"[%v] (%v), at %s %d:%d:\n",
+			n, t.NormalizedName,
+			t.Pos.File,
+			t.Pos.Line,
+			t.Pos.Char,
+		)
+		fmt.Printf("  deps: [%v]\n", t.Dependencies)
+		fmt.Printf("  cmds: [%v]\n", t.Commands)
+	}
+}
+
 func dbgtokens(tokens []typedefs.Token) {
 	for idx, token := range tokens {
 		fmt.Printf("%d: %s\n", idx, toktype(token.Kind))
