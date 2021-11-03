@@ -3,7 +3,7 @@
 :macro Feature3 Has includes?
 :macro Features $(Feature1); $(Feature2); $(Feature3) Now it does
 
-root: wat
+root:
 	echo $(Features)
 	# note, rule name should trigger conflict.
 	echo Erase ^that and me when done

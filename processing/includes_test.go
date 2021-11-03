@@ -26,8 +26,8 @@ func Test_PreprocessIncludes(t *testing.T) {
 		t.Fatalf("preprocessing includes error: %s", err)
 	}
 	// debugTokens(tokens)
-	if 129 != len(tokens) {
-		t.Fatalf("expected exactly 129 tokens with includes, got %d", len(tokens))
+	if 128 != len(tokens) {
+		t.Fatalf("expected exactly 128 tokens with includes, got %d", len(tokens))
 	}
 }
 
@@ -47,5 +47,8 @@ func Test_ApplyIncludes(t *testing.T) {
 		t.Fatalf("macros expansion failed")
 	}
 
-	debugTokens(tokens)
+	// debugTokens(tokens)
+	if 102 != len(tokens) {
+		t.Fatalf("expected exactly 102 tokens with includes, got %d", len(tokens))
+	}
 }
