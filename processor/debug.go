@@ -55,3 +55,15 @@ func toktype(kind typedefs.TokenType) string {
 	}
 	return "wut"
 }
+
+func tokenError(tk typedefs.Token, msg string) error {
+	return fmt.Errorf(
+		"ERROR: %s %d %d (%v): %v",
+		tk.Pos.File,
+		tk.Pos.Line,
+		tk.Pos.Char,
+		toktype(tk.Kind),
+		msg,
+	)
+
+}
