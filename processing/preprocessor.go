@@ -92,11 +92,12 @@ func preprocessMacros(tokens []typedefs.Token) ([]typedefs.Token, error) {
 }
 
 func includeFile(filepath string, relativeToSource string) ([]typedefs.Token, error) {
-	lines, err := shell.LoadFile(shell.PathRelativeTo(filepath, relativeToSource))
+	relpath := shell.PathRelativeTo(filepath, relativeToSource)
+	lines, err := shell.LoadFile(relpath)
 	if err != nil {
 		return nil, err
 	}
-	tkn := newTokenizer(filepath, lines)
+	tkn := newTokenizer(relpath, lines)
 	return tkn.tokenize(), nil
 }
 
