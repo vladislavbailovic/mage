@@ -6,9 +6,9 @@ TODO:
 -----
 
 - [X] Implement evaluation stack creation
-- [ ] Implement evaulation stack processing
-- Spaces are significant (at least in command definitions)
-- Implement result reporting
+- [X] Implement evaulation stack processing
+- [ ] Implement result reporting
+- [ ] Spaces are significant (at least in command definitions)
 
 
 Features:
