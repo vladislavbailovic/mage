@@ -1,4 +1,4 @@
-package processor
+package processing
 
 // Processes a set of pre-processed tokens into
 // intermediate ruleset representation

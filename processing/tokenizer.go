@@ -1,4 +1,4 @@
-package processor
+package processing
 
 // Builds a list of tokens to be used further in the
 // processing pipeline.
@@ -8,27 +8,27 @@ import (
 )
 
 type tokenizerPosition struct {
-	source string
-	cursor int
+	source      string
+	cursor      int
 	currentLine int
 	currentChar int
 }
 
-func (tp *tokenizerPosition)advanceCursor(chr int) {
+func (tp *tokenizerPosition) advanceCursor(chr int) {
 	tp.cursor += chr
 }
-func (tp *tokenizerPosition)advanceChar(chr int) {
+func (tp *tokenizerPosition) advanceChar(chr int) {
 	tp.currentChar += chr
 }
-func (tp *tokenizerPosition)advanceLine(chr int) {
+func (tp *tokenizerPosition) advanceLine(chr int) {
 	tp.currentLine += chr
 	tp.currentChar = 1
 }
-func (tp *tokenizerPosition)advance(chr int) {
+func (tp *tokenizerPosition) advance(chr int) {
 	tp.advanceCursor(chr)
 	tp.advanceChar(chr)
 }
-func (tp tokenizerPosition)getPosition() typedefs.SourcePosition {
+func (tp tokenizerPosition) getPosition() typedefs.SourcePosition {
 	return typedefs.SourcePosition{
 		tp.source,
 		tp.currentLine,
@@ -37,21 +37,21 @@ func (tp tokenizerPosition)getPosition() typedefs.SourcePosition {
 }
 
 type tokenizer struct {
-	tokens []typedefs.Token
-	content string
+	tokens   []typedefs.Token
+	content  string
 	position *tokenizerPosition
 }
 
 func newTokenizer(source string, content string) *tokenizer {
-	pos := tokenizerPosition{ source, 0, 1, 1 }
+	pos := tokenizerPosition{source, 0, 1, 1}
 	tkn := tokenizer{
-		content: content,
+		content:  content,
 		position: &pos,
 	}
 	return &tkn
 }
 
-func (t *tokenizer)addNewToken(kind typedefs.TokenType, value string) {
+func (t *tokenizer) addNewToken(kind typedefs.TokenType, value string) {
 	t.addToken(typedefs.Token{
 		t.position.getPosition(),
 		kind,
@@ -59,18 +59,18 @@ func (t *tokenizer)addNewToken(kind typedefs.TokenType, value string) {
 	})
 }
 
-func (t *tokenizer)addToken(tk typedefs.Token) {
+func (t *tokenizer) addToken(tk typedefs.Token) {
 	t.tokens = append(t.tokens, tk)
 }
 
-func (t *tokenizer)tokenizeSubstring(substr string) []typedefs.Token {
+func (t *tokenizer) tokenizeSubstring(substr string) []typedefs.Token {
 	subt := newTokenizer(t.position.source, substr)
 	subt.position.currentLine = t.position.currentLine
 	subt.position.currentChar = t.position.currentChar
 	return subt.tokenize()
 }
 
-func (t *tokenizer)processNewline(word string) string {
+func (t *tokenizer) processNewline(word string) string {
 	if len(word) > 0 {
 		t.addNewToken(typedefs.TOKEN_WORD, word)
 		word = ""
@@ -80,7 +80,7 @@ func (t *tokenizer)processNewline(word string) string {
 	return word
 }
 
-func (t *tokenizer)processCommand(word string) string {
+func (t *tokenizer) processCommand(word string) string {
 	// Command
 	content := t.content + " \n"
 	t.position.advance(1)
@@ -94,7 +94,7 @@ func (t *tokenizer)processCommand(word string) string {
 	return ""
 }
 
-func (t *tokenizer)processMacroDfn(word string) string {
+func (t *tokenizer) processMacroDfn(word string) string {
 	content := t.content + " \n"
 	kwLen := len("macro")
 	// Macro definition
@@ -109,7 +109,7 @@ func (t *tokenizer)processMacroDfn(word string) string {
 	return ""
 }
 
-func (t *tokenizer)processMacroCall(word string) string {
+func (t *tokenizer) processMacroCall(word string) string {
 	content := t.content + " \n"
 	if len(word) > 0 {
 		t.addNewToken(typedefs.TOKEN_WORD, word)
@@ -122,11 +122,11 @@ func (t *tokenizer)processMacroCall(word string) string {
 		t.addToken(tk)
 	}
 	t.addNewToken(typedefs.TOKEN_MACRO_CALL_CLOSE, "")
-	t.position.advance(len(macro)+1)
+	t.position.advance(len(macro) + 1)
 	return ""
 }
 
-func (t *tokenizer)processRule(word string) string {
+func (t *tokenizer) processRule(word string) string {
 	content := t.content + " \n"
 	// Rule definition
 	name := consumeBackUntil("\n", content, t.position.cursor-1)
@@ -135,19 +135,19 @@ func (t *tokenizer)processRule(word string) string {
 	for _, tk := range t.tokenizeSubstring(name) {
 		t.addToken(tk)
 	}
-	t.position.advanceChar(len(name)+1)
+	t.position.advanceChar(len(name) + 1)
 	for _, tk := range t.tokenizeSubstring(dependencies) {
 		t.addToken(tk)
 	}
 	t.addNewToken(typedefs.TOKEN_RULE_CLOSE, "")
-	t.position.advance(len(dependencies)+1)
+	t.position.advance(len(dependencies) + 1)
 	return ""
 }
 
-func (t *tokenizer)tokenize() []typedefs.Token {
+func (t *tokenizer) tokenize() []typedefs.Token {
 	content := t.content + " \n"
 	word := ""
-	for t.position.cursor < len(content) - 1 {
+	for t.position.cursor < len(content)-1 {
 		chr := string(content[t.position.cursor])
 
 		if "\t" == chr {
@@ -190,7 +190,7 @@ func (t *tokenizer)tokenize() []typedefs.Token {
 		if " " == chr && len(word) > 0 {
 			t.addNewToken(typedefs.TOKEN_WORD, word)
 			t.position.advanceCursor(1)
-			t.position.advanceChar(len(word)+1)
+			t.position.advanceChar(len(word) + 1)
 			word = ""
 			continue
 		}
@@ -202,7 +202,7 @@ func (t *tokenizer)tokenize() []typedefs.Token {
 	return t.tokens
 }
 
-func (t tokenizer)filter(expected typedefs.TokenType) []typedefs.Token {
+func (t tokenizer) filter(expected typedefs.TokenType) []typedefs.Token {
 	result := []typedefs.Token{}
 	for _, tk := range t.tokens {
 		if expected != tk.Kind {
@@ -213,11 +213,9 @@ func (t tokenizer)filter(expected typedefs.TokenType) []typedefs.Token {
 	return result
 }
 
-
-
 func consumeUntil(what string, source string, pos int) string {
 	item := ""
-	for i := pos; i < len(source) - 1; i++ {
+	for i := pos; i < len(source)-1; i++ {
 		chr := string(source[i])
 		if chr == what {
 			break

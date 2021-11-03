@@ -1,14 +1,14 @@
-package processor
+package processing
 
 import (
-	"testing"
 	"strings"
+	"testing"
 
 	"mage/typedefs"
 )
 
 func Test_TokenizerPosition(t *testing.T) {
-	pos := tokenizerPosition{"test", 0, 0, 0 }
+	pos := tokenizerPosition{"test", 0, 0, 0}
 	pos.advance(161)
 	if pos.currentChar != 161 {
 		t.Fatalf("advance should move char to 161, got %d", pos.currentChar)
@@ -65,49 +65,49 @@ func Test_WordPositions(t *testing.T) {
 	tokens := tkn.tokenize()
 	expecteds := [][]int{
 		//[]int{1,1}, // "macro" gets nerfed
-		[]int{1,7},
-		[]int{1,12},
-		[]int{1,21},
-		[]int{1,26},
-		[]int{1,32},
-		[]int{1,37},
-		[]int{1,40},
-	// macro OTHER $(M3)
+		[]int{1, 7},
+		[]int{1, 12},
+		[]int{1, 21},
+		[]int{1, 26},
+		[]int{1, 32},
+		[]int{1, 37},
+		[]int{1, 40},
+		// macro OTHER $(M3)
 		//[]int{2,1}, // "macro" gets nerfed
-		[]int{2,7},
-		[]int{2,13},
-	// macro M3 $(M4)
+		[]int{2, 7},
+		[]int{2, 13},
+		// macro M3 $(M4)
 		//[]int{3,1}, // "macro" gets nerfed
-		[]int{3,7},
-		[]int{3,10},
-	// macro M4 $(NAME)
+		[]int{3, 7},
+		[]int{3, 10},
+		// macro M4 $(NAME)
 		//[]int{4,1}, // "macro" gets nerfed
-		[]int{4,7},
-		[]int{4,10},
-	// macro M5 $(NAME)
+		[]int{4, 7},
+		[]int{4, 10},
+		// macro M5 $(NAME)
 		//[]int{5,1}, // "macro" gets nerfed
-		[]int{5,7},
-		[]int{5,10},
-	// root: tmp/whatever.test
-		[]int{7,1},
-		[]int{7,6},
-	// echo $(NAME)
-		[]int{8,2}, // has tab
-		[]int{8,7},
-	// tmp/whatever.test:
-		[]int{10,1},
-	// echo nay nya $(OTHER)
-		[]int{11,2}, // has tab
-		[]int{11,7},
-		[]int{11,11},
-		[]int{11,15},
-	// sed -e 's/$(M5)/nana/g'
-		[]int{12,2}, // has tab
-		[]int{12,6},
-		[]int{12,9},
+		[]int{5, 7},
+		[]int{5, 10},
+		// root: tmp/whatever.test
+		[]int{7, 1},
+		[]int{7, 6},
+		// echo $(NAME)
+		[]int{8, 2}, // has tab
+		[]int{8, 7},
+		// tmp/whatever.test:
+		[]int{10, 1},
+		// echo nay nya $(OTHER)
+		[]int{11, 2}, // has tab
+		[]int{11, 7},
+		[]int{11, 11},
+		[]int{11, 15},
+		// sed -e 's/$(M5)/nana/g'
+		[]int{12, 2}, // has tab
+		[]int{12, 6},
+		[]int{12, 9},
 	}
 	current := 0
-	for idx,tk := range tokens {
+	for idx, tk := range tokens {
 		if typedefs.TOKEN_WORD != tk.Kind {
 			continue
 		}
@@ -119,7 +119,7 @@ func Test_WordPositions(t *testing.T) {
 			t.Fatalf("expected [%s](%d) to start on char %d, but got %d", tk.Value, idx, e[1], tk.Pos.Char)
 		}
 		current++
-		if current > len(expecteds) - 1 {
+		if current > len(expecteds)-1 {
 			break
 		}
 	}
@@ -129,13 +129,13 @@ func Test_TokenizerSetsProperPositions_MacroDfn(t *testing.T) {
 	lines, _ := loadFile("../fixtures/macro.mg")
 	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
 	tkn.tokenize()
-	for _,tk := range tkn.filter(typedefs.TOKEN_MACRO_DFN_OPEN) {
+	for _, tk := range tkn.filter(typedefs.TOKEN_MACRO_DFN_OPEN) {
 		if tk.Pos.Char != 7 {
 			t.Fatalf("macro dfn should start at 7 (because keyword gets dropped), got %d", tk.Pos.Char)
 		}
 	}
 	prev := 0
-	for _,tk := range tkn.filter(typedefs.TOKEN_MACRO_DFN_CLOSE) {
+	for _, tk := range tkn.filter(typedefs.TOKEN_MACRO_DFN_CLOSE) {
 		if tk.Pos.Line <= prev {
 			t.Fatalf("macro dfn should end after %d, got %d", prev, tk.Pos.Line)
 		}
@@ -153,7 +153,7 @@ func Test_TokenizerSetsProperPositions_Command(t *testing.T) {
 		}
 	}
 	prev := 0
-	for _,tk := range tkn.filter(typedefs.TOKEN_COMMAND_CLOSE) {
+	for _, tk := range tkn.filter(typedefs.TOKEN_COMMAND_CLOSE) {
 		if tk.Pos.Line <= prev {
 			t.Fatalf("command should end after %d, got %d", prev, tk.Pos.Line)
 		}

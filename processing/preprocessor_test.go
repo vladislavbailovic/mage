@@ -1,8 +1,8 @@
-package processor
+package processing
 
 import (
-	"testing"
 	"strings"
+	"testing"
 )
 
 func Test_Preprocessor(t *testing.T) {
@@ -18,4 +18,3 @@ func Test_Preprocessor(t *testing.T) {
 		t.Fatalf("expected macros to be removed from tokens, got %d", len(tokens))
 	}
 }
-

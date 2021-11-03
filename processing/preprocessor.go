@@ -1,4 +1,4 @@
-package processor
+package processing
 
 // Preprocesses the list of tokens by expanding macros.
 
@@ -135,4 +135,3 @@ func getRawMacroDefinitions(tokens []typedefs.Token) (map[string]typedefs.MacroD
 
 	return result, nil
 }
-
