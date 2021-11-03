@@ -5,8 +5,78 @@ import (
 	"mage/typedefs"
 )
 
-func preprocess(tokens []token) ([]typedefs.MacroDefinition, error) {
-	result := []typedefs.MacroDefinition{}
+const MACRO_EXPANSION_RECURSE_LIMIT = 10
+
+
+type macroDefinition struct {
+	Pos typedefs.SourcePosition
+	Name string
+	tokens []token
+}
+
+func preprocess(tokens []token) ([]token, error) {
+	mds, err := getMacroDefinitions(tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("----- before -----")
+	dbgdefs(mds)
+
+	// Prepare macro definitions by expanding calls
+	recursionCounter := 0
+	for recursionCounter < MACRO_EXPANSION_RECURSE_LIMIT {
+		didReplacement := false
+		for name, md := range mds {
+			for idx, token := range md.tokens {
+				if token.kind != typedefs.TOKEN_MACRO_CALL_OPEN {
+					continue
+				}
+				nameTok := md.tokens[idx+1]
+				if nameTok.kind != typedefs.TOKEN_WORD {
+					panic("macro call has to be a word")
+				}
+
+				macro, ok := mds[nameTok.value]
+				if !ok {
+					panic("can't find token: " + nameTok.value)
+				}
+
+				closeTok := md.tokens[idx+2]
+				if closeTok.kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
+					panic("macro call not closed off")
+				}
+
+				tks := append(md.tokens[0:idx], macro.tokens...)
+				tks = append(tks, md.tokens[idx+3:]...)
+				md.tokens = tks
+				mds[name] = md
+				didReplacement = true
+			}
+		}
+		recursionCounter++
+		if !didReplacement {
+			break
+		}
+	}
+
+	fmt.Println("----- after -----")
+	dbgdefs(mds)
+
+	return tokens, nil
+}
+
+func dbgdefs(mds map[string]macroDefinition) {
+	for n,m := range mds {
+		fmt.Printf("- [%s]:\n", n)
+		for _, t := range m.tokens {
+			fmt.Printf("\t> [%s] (%s)\n", toktype(t.kind), t.value)
+		}
+	}
+}
+
+func getMacroDefinitions(tokens []token) (map[string]macroDefinition, error) {
+	result := map[string]macroDefinition{}
 
 	for i := 0; i < len(tokens); i++ {
 		if tokens[i].kind != typedefs.TOKEN_MACRO_DFN_OPEN {
@@ -22,8 +92,9 @@ func preprocess(tokens []token) ([]typedefs.MacroDefinition, error) {
 				nameToken.pos.Char,
 			)
 		}
+		i += 1
 
-		valueTokens := []string{}
+		valueTokens := []token{}
 		for j := i; j < len(tokens); j++ {
 			if tokens[j].kind == typedefs.TOKEN_MACRO_DFN_CLOSE {
 				break
@@ -37,7 +108,13 @@ func preprocess(tokens []token) ([]typedefs.MacroDefinition, error) {
 					toktype(tokens[j].kind),
 				)
 			}
-			valueTokens = append(valueTokens, tokens[j].value)
+			valueTokens = append(valueTokens, tokens[j])
+		}
+
+		result[nameToken.value] = macroDefinition{
+			nameToken.pos,
+			nameToken.value,
+			valueTokens,
 		}
 
 		i += len(valueTokens)

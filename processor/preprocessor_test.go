@@ -12,6 +12,8 @@ func Test_Preprocessor(t *testing.T) {
 	if err != nil {
 		t.Fatalf("preprocessing error: %s", err)
 	}
-	t.Log(tokens)
+	for _,tk := range tokens {
+		t.Logf("> %s (%s)\n", tk.value, toktype(tk.kind))
+	}
 }
 
