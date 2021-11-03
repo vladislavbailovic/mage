@@ -1,11 +1,11 @@
 package processor
 
 import (
-	"fmt"
-	"os"
 	"bufio"
 	"errors"
+	"fmt"
 	"mage/typedefs"
+	"os"
 )
 
 func loadFile(fpath string) ([]string, error) {
@@ -24,7 +24,7 @@ func loadFile(fpath string) ([]string, error) {
 }
 
 func dbgdefs(mds map[string]typedefs.MacroDefinition) {
-	for n,m := range mds {
+	for n, m := range mds {
 		fmt.Printf("- [%s]:\n", n)
 		for _, t := range m.Tokens {
 			fmt.Printf("\t> [%s] (%s)\n", toktype(t.Kind), t.Value)
@@ -32,7 +32,7 @@ func dbgdefs(mds map[string]typedefs.MacroDefinition) {
 	}
 }
 
-func dbgtaskdefs(tds map[string]typedefs.TaskDefinition) {
+func debugTaskDefinitions(tds map[string]typedefs.TaskDefinition) {
 	for n, t := range tds {
 		fmt.Printf(
 			"[%v] (%v), at %s %d:%d:\n",
@@ -41,8 +41,15 @@ func dbgtaskdefs(tds map[string]typedefs.TaskDefinition) {
 			t.Pos.Line,
 			t.Pos.Char,
 		)
-		fmt.Printf("  deps: [%v]\n", t.Dependencies)
-		fmt.Printf("  cmds: [%v]\n", t.Commands)
+		fmt.Printf("  deps: ")
+		for di, dep := range t.Dependencies {
+			fmt.Printf("[%d: {%v}], ", di, dep)
+		}
+		fmt.Printf("\n  cmds: ")
+		for dc, cmd := range t.Commands {
+			fmt.Printf("[%d: {%v}], ", dc, cmd)
+		}
+		fmt.Println("")
 	}
 }
 
@@ -60,7 +67,7 @@ func dbgtokens(tokens []typedefs.Token) {
 }
 
 func toktype(kind typedefs.TokenType) string {
-	switch(kind) {
+	switch kind {
 	case typedefs.TOKEN_WORD:
 		return "word"
 	case typedefs.TOKEN_MACRO_DFN_OPEN:

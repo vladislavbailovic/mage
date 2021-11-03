@@ -4,7 +4,6 @@ package processor
 // intermediate ruleset representation
 
 import (
-	"fmt"
 	"strings"
 
 	"mage/typedefs"
@@ -19,15 +18,15 @@ func process(tokens []typedefs.Token) (map[string]typedefs.TaskDefinition, error
 	ruleName := ""
 	dependencies := []string{}
 	for i := 0; i < len(tokens); i++ {
+
 		if tokens[i].Kind == typedefs.TOKEN_COMMAND_OPEN {
 			i += 1
 			currentCommand = []string{}
 			for j := i; j < len(tokens); j++ {
 				if tokens[j].Kind == typedefs.TOKEN_COMMAND_CLOSE {
 					cmd := strings.Join(currentCommand, " ")
-					fmt.Println("adding command", cmd)
 					commands = append(commands, cmd)
-					break;
+					break
 				}
 				if tokens[j].Kind != typedefs.TOKEN_WORD {
 					return nil, tokenError(tokens[j], "only words allowed in commands")
@@ -67,7 +66,6 @@ func process(tokens []typedefs.Token) (map[string]typedefs.TaskDefinition, error
 				}
 				dependencies = append(dependencies, tokens[j].Value)
 			}
-			i += 1
 			continue
 		}
 	}

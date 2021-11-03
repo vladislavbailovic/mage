@@ -1,8 +1,8 @@
 package processor
 
 import (
-	"testing"
 	"strings"
+	"testing"
 )
 
 func Test_Process(t *testing.T) {
@@ -14,6 +14,5 @@ func Test_Process(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected processing to succeed")
 	}
-	dbgtaskdefs(dfns)
+	debugTaskDefinitions(dfns)
 }
-
