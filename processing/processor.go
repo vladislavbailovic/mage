@@ -8,12 +8,13 @@ import (
 	"path"
 	"strings"
 
+	"mage/shell"
 	"mage/typedefs"
 )
 
 func ProcessFile(filepath string) (map[string]typedefs.TaskDefinition, error) {
-	lines, _ := loadFile(filepath)
-	tkn := newTokenizer(path.Base(filepath), strings.Join(lines, "\n"))
+	lines, _ := shell.LoadFile(filepath)
+	tkn := newTokenizer(path.Base(filepath), lines)
 	tokens, _ := preprocess(tkn.tokenize())
 	return process(tokens)
 }

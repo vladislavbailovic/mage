@@ -1,13 +1,13 @@
 package processing
 
 import (
-	"strings"
+	"mage/shell"
 	"testing"
 )
 
 func Test_Process(t *testing.T) {
-	lines, _ := loadFile("../fixtures/macro.mg")
-	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
+	lines, _ := shell.LoadFile("../fixtures/macro.mg")
+	tkn := newTokenizer("macro.mg", lines)
 	rawTokens := tkn.tokenize()
 	tokens, _ := preprocess(rawTokens)
 	dfns, err := process(tokens)
@@ -21,8 +21,8 @@ func Test_Process(t *testing.T) {
 }
 
 func Test_Process_RedefiningRulesCausesError(t *testing.T) {
-	lines, _ := loadFile("../fixtures/rule-conflict.mg")
-	tkn := newTokenizer("rule-conflict.mg", strings.Join(lines, "\n"))
+	lines, _ := shell.LoadFile("../fixtures/rule-conflict.mg")
+	tkn := newTokenizer("rule-conflict.mg", lines)
 	rawTokens := tkn.tokenize()
 	tokens, _ := preprocess(rawTokens)
 	_, err := process(tokens)

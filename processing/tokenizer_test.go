@@ -1,9 +1,9 @@
 package processing
 
 import (
-	"strings"
 	"testing"
 
+	"mage/shell"
 	"mage/typedefs"
 )
 
@@ -41,8 +41,8 @@ func Test_TokenizerPosition(t *testing.T) {
 }
 
 func Test_Tokenizer(t *testing.T) {
-	lines, _ := loadFile("../fixtures/macro.mg")
-	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
+	lines, _ := shell.LoadFile("../fixtures/macro.mg")
+	tkn := newTokenizer("macro.mg", lines)
 	expected := 63
 	tokens := tkn.tokenize()
 	// debugTokens(tokens)
@@ -60,8 +60,8 @@ func Test_Tokenizer(t *testing.T) {
 }
 
 func Test_WordPositions(t *testing.T) {
-	lines, _ := loadFile("../fixtures/macro.mg")
-	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
+	lines, _ := shell.LoadFile("../fixtures/macro.mg")
+	tkn := newTokenizer("macro.mg", lines)
 	tokens := tkn.tokenize()
 	expecteds := [][]int{
 		//[]int{1,1}, // "macro" gets nerfed
@@ -126,8 +126,8 @@ func Test_WordPositions(t *testing.T) {
 }
 
 func Test_TokenizerSetsProperPositions_MacroDfn(t *testing.T) {
-	lines, _ := loadFile("../fixtures/macro.mg")
-	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
+	lines, _ := shell.LoadFile("../fixtures/macro.mg")
+	tkn := newTokenizer("macro.mg", lines)
 	tkn.tokenize()
 	for _, tk := range tkn.filter(typedefs.TOKEN_MACRO_DFN_OPEN) {
 		if tk.Pos.Char != 8 {
@@ -144,8 +144,8 @@ func Test_TokenizerSetsProperPositions_MacroDfn(t *testing.T) {
 }
 
 func Test_TokenizerSetsProperPositions_Command(t *testing.T) {
-	lines, _ := loadFile("../fixtures/macro.mg")
-	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
+	lines, _ := shell.LoadFile("../fixtures/macro.mg")
+	tkn := newTokenizer("macro.mg", lines)
 	tkn.tokenize()
 	for _, tk := range tkn.filter(typedefs.TOKEN_COMMAND_OPEN) {
 		if tk.Pos.Char != 2 {
@@ -162,8 +162,8 @@ func Test_TokenizerSetsProperPositions_Command(t *testing.T) {
 }
 
 func Test_TokenizerSetsProperPositions_MacroCall(t *testing.T) {
-	lines, _ := loadFile("../fixtures/macro.mg")
-	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
+	lines, _ := shell.LoadFile("../fixtures/macro.mg")
+	tkn := newTokenizer("macro.mg", lines)
 	tkn.tokenize()
 
 	co := tkn.filter(typedefs.TOKEN_MACRO_CALL_OPEN)

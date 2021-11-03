@@ -1,27 +1,9 @@
 package processing
 
 import (
-	"bufio"
-	"errors"
 	"fmt"
 	"mage/typedefs"
-	"os"
 )
-
-func loadFile(fpath string) ([]string, error) {
-	fp, err := os.Open(fpath)
-	if err != nil {
-		return nil, errors.New("Error reading file: " + fpath)
-	}
-	defer fp.Close()
-
-	lines := []string{}
-	scanner := bufio.NewScanner(fp)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	return lines, nil
-}
 
 func debugMacroDefinitions(mds map[string]typedefs.MacroDefinition) {
 	for n, m := range mds {

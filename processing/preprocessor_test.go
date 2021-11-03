@@ -1,13 +1,13 @@
 package processing
 
 import (
-	"strings"
+	"mage/shell"
 	"testing"
 )
 
 func Test_PreprocessorMacros(t *testing.T) {
-	lines, _ := loadFile("../fixtures/macro.mg")
-	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
+	lines, _ := shell.LoadFile("../fixtures/macro.mg")
+	tkn := newTokenizer("macro.mg", lines)
 	rawTokens := tkn.tokenize()
 	tokens, err := preprocess(rawTokens)
 	if err != nil {

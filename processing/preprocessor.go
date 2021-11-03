@@ -4,9 +4,9 @@ package processing
 
 import (
 	"fmt"
+	"mage/shell"
 	"mage/typedefs"
 	"path"
-	"strings"
 )
 
 const MACRO_EXPANSION_RECURSE_LIMIT = 10
@@ -92,11 +92,11 @@ func preprocessMacros(tokens []typedefs.Token) ([]typedefs.Token, error) {
 }
 
 func includeFile(filepath string) ([]typedefs.Token, error) {
-	lines, err := loadFile(filepath)
+	lines, err := shell.LoadFile(filepath)
 	if err != nil {
 		return nil, err
 	}
-	tkn := newTokenizer(path.Base(filepath), strings.Join(lines, "\n"))
+	tkn := newTokenizer(path.Base(filepath), lines)
 	return tkn.tokenize(), nil
 }
 

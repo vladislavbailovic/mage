@@ -1,14 +1,14 @@
 package processing
 
 import (
+	"mage/shell"
 	"path"
-	"strings"
 	"testing"
 )
 
 func Test_TokenizeIncludes(t *testing.T) {
-	lines, _ := loadFile("../fixtures/includes.mg")
-	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
+	lines, _ := shell.LoadFile("../fixtures/includes.mg")
+	tkn := newTokenizer("macro.mg", lines)
 	rawTokens := tkn.tokenize()
 	// debugTokens(rawTokens)
 	if len(rawTokens) <= 0 {
@@ -18,8 +18,8 @@ func Test_TokenizeIncludes(t *testing.T) {
 
 func Test_PreprocessIncludes(t *testing.T) {
 	filepath := "../fixtures/includes.mg"
-	lines, _ := loadFile(filepath)
-	tkn := newTokenizer(path.Base(filepath), strings.Join(lines, "\n"))
+	lines, _ := shell.LoadFile(filepath)
+	tkn := newTokenizer(path.Base(filepath), lines)
 	rawTokens := tkn.tokenize()
 	tokens, err := preprocessIncludes(rawTokens)
 	if err != nil {
@@ -33,8 +33,8 @@ func Test_PreprocessIncludes(t *testing.T) {
 
 func Test_ApplyIncludes(t *testing.T) {
 	filepath := "../fixtures/includes.mg"
-	lines, _ := loadFile(filepath)
-	tkn := newTokenizer(path.Base(filepath), strings.Join(lines, "\n"))
+	lines, _ := shell.LoadFile(filepath)
+	tkn := newTokenizer(path.Base(filepath), lines)
 	rawTokens, err := preprocessIncludes(tkn.tokenize())
 	if err != nil {
 		t.Log(err)
