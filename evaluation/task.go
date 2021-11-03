@@ -1,8 +1,6 @@
 package evaluation
 
 import (
-	"os"
-
 	"mage/shell"
 	"mage/typedefs"
 )
@@ -33,12 +31,7 @@ func (t ruleTask) getAge() int64 {
 	return 0
 }
 func (t fileTask) getAge() int64 {
-	fpath := t.name
-	f, err := os.Stat(fpath)
-	if err != nil {
-		return 0
-	}
-	return f.ModTime().Unix()
+	return shell.GetFileMtime(t.name)
 }
 
 func newTask(dfn typedefs.TaskDefinition) task {

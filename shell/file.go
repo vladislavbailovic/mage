@@ -21,3 +21,11 @@ func FileExists(filepath string) bool {
 	_, err := os.Stat(filepath)
 	return err == nil
 }
+
+func GetFileMtime(filepath string) int64 {
+	info, err := os.Stat(filepath)
+	if err != nil {
+		return 0
+	}
+	return info.ModTime().Unix()
+}
