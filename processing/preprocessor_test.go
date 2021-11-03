@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_Preprocessor(t *testing.T) {
+func Test_PreprocessorMacros(t *testing.T) {
 	lines, _ := loadFile("../fixtures/macro.mg")
 	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
 	rawTokens := tkn.tokenize()
