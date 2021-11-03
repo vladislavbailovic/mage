@@ -5,7 +5,6 @@ Mage - task runner in go
 TODO:
 -----
 
-- Includes
 - Spaces are significant (at least in command definitions)
 - Implement evaluation stack creation
 - Implement evaulation stack processing
@@ -15,10 +14,12 @@ TODO:
 Features:
 ---------
 
+- Has includes
 - Has macros
 - Macros are recursive _in definition_
 - Has tasks
 - Tasks have dependencies on other tasks or files
+- Tasks cannot be redefined
 - Execution order:
 	0. Select a task:
 		- If called with task argument, use that
