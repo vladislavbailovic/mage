@@ -2,13 +2,12 @@ package processing
 
 import (
 	"mage/shell"
-	"path"
 	"testing"
 )
 
 func Test_TokenizeIncludes(t *testing.T) {
 	lines, _ := shell.LoadFile("../fixtures/includes.mg")
-	tkn := newTokenizer("macro.mg", lines)
+	tkn := newTokenizer("../fixtures/includes.mg", lines)
 	rawTokens := tkn.tokenize()
 	// debug.Tokens(rawTokens)
 	if len(rawTokens) <= 0 {
@@ -19,7 +18,7 @@ func Test_TokenizeIncludes(t *testing.T) {
 func Test_PreprocessIncludes(t *testing.T) {
 	filepath := "../fixtures/includes.mg"
 	lines, _ := shell.LoadFile(filepath)
-	tkn := newTokenizer(path.Base(filepath), lines)
+	tkn := newTokenizer(filepath, lines)
 	rawTokens := tkn.tokenize()
 	tokens, err := preprocessIncludes(rawTokens)
 	if err != nil {
@@ -34,7 +33,7 @@ func Test_PreprocessIncludes(t *testing.T) {
 func Test_ApplyIncludes(t *testing.T) {
 	filepath := "../fixtures/includes.mg"
 	lines, _ := shell.LoadFile(filepath)
-	tkn := newTokenizer(path.Base(filepath), lines)
+	tkn := newTokenizer(filepath, lines)
 	rawTokens, err := preprocessIncludes(tkn.tokenize())
 	if err != nil {
 		t.Log(err)

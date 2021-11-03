@@ -5,7 +5,6 @@ package processing
 
 import (
 	"fmt"
-	"path"
 	"strings"
 
 	"mage/debug"
@@ -15,7 +14,7 @@ import (
 
 func ProcessFile(filepath string) (map[string]typedefs.TaskDefinition, error) {
 	lines, _ := shell.LoadFile(filepath)
-	tkn := newTokenizer(path.Base(filepath), lines)
+	tkn := newTokenizer(filepath, lines)
 	tokens, _ := preprocess(tkn.tokenize())
 	return process(tokens)
 }

@@ -7,7 +7,6 @@ import (
 	"mage/debug"
 	"mage/shell"
 	"mage/typedefs"
-	"path"
 )
 
 const MACRO_EXPANSION_RECURSE_LIMIT = 10
@@ -32,7 +31,7 @@ func preprocessIncludes(tokens []typedefs.Token) ([]typedefs.Token, error) {
 			return nil, debug.TokenError(tokens[i], "include can only have words")
 		}
 		filepath := tokens[i].Value
-		loadedTokens, err := includeFile(filepath)
+		loadedTokens, err := includeFile(filepath, tokens[i].Pos.File)
 		if err != nil {
 			return nil, err
 		}
@@ -92,12 +91,12 @@ func preprocessMacros(tokens []typedefs.Token) ([]typedefs.Token, error) {
 	return result, nil
 }
 
-func includeFile(filepath string) ([]typedefs.Token, error) {
-	lines, err := shell.LoadFile(filepath)
+func includeFile(filepath string, relativeToSource string) ([]typedefs.Token, error) {
+	lines, err := shell.LoadFile(shell.PathRelativeTo(filepath, relativeToSource))
 	if err != nil {
 		return nil, err
 	}
-	tkn := newTokenizer(path.Base(filepath), lines)
+	tkn := newTokenizer(filepath, lines)
 	return tkn.tokenize(), nil
 }
 

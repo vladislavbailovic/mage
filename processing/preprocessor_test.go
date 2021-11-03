@@ -7,7 +7,7 @@ import (
 
 func Test_PreprocessorMacros(t *testing.T) {
 	lines, _ := shell.LoadFile("../fixtures/macro.mg")
-	tkn := newTokenizer("macro.mg", lines)
+	tkn := newTokenizer("../fixtures/macro.mg", lines)
 	rawTokens := tkn.tokenize()
 	tokens, err := preprocess(rawTokens)
 	if err != nil {

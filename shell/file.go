@@ -3,7 +3,9 @@ package shell
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -33,4 +35,10 @@ func LoadFile(filepath string) (string, error) {
 		lines = append(lines, scanner.Text())
 	}
 	return strings.Join(lines, "\n"), nil
+}
+
+func PathRelativeTo(filepath string, relativeTo string) string {
+	fmt.Println(os.Getwd())
+	fmt.Println(path.Dir(relativeTo))
+	return filepath
 }

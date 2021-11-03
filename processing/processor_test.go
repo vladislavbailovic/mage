@@ -7,7 +7,7 @@ import (
 
 func Test_Process(t *testing.T) {
 	lines, _ := shell.LoadFile("../fixtures/macro.mg")
-	tkn := newTokenizer("macro.mg", lines)
+	tkn := newTokenizer("../fixtures/macro.mg", lines)
 	rawTokens := tkn.tokenize()
 	tokens, _ := preprocess(rawTokens)
 	dfns, err := process(tokens)
@@ -22,7 +22,7 @@ func Test_Process(t *testing.T) {
 
 func Test_Process_RedefiningRulesCausesError(t *testing.T) {
 	lines, _ := shell.LoadFile("../fixtures/rule-conflict.mg")
-	tkn := newTokenizer("rule-conflict.mg", lines)
+	tkn := newTokenizer("../fixtures/rule-conflict.mg", lines)
 	rawTokens := tkn.tokenize()
 	tokens, _ := preprocess(rawTokens)
 	_, err := process(tokens)
