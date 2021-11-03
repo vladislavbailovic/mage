@@ -51,7 +51,7 @@ func process(tokens []typedefs.Token) (map[string]typedefs.TaskDefinition, error
 				// Add old rule
 				result[ruleName] = typedefs.TaskDefinition{
 					rulePos,
-					ruleName, ruleName,
+					ruleName,
 					dependencies,
 					commands,
 				}
@@ -87,7 +87,7 @@ func process(tokens []typedefs.Token) (map[string]typedefs.TaskDefinition, error
 		// Add old rule
 		result[ruleName] = typedefs.TaskDefinition{
 			rulePos,
-			ruleName, ruleName,
+			ruleName,
 			dependencies,
 			commands,
 		}

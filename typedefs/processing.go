@@ -18,11 +18,10 @@ type SourcePosition struct {
 }
 
 type TaskDefinition struct {
-	Pos            SourcePosition
-	Name           string
-	NormalizedName string
-	Dependencies   []string
-	Commands       []string
+	Pos          SourcePosition
+	Name         string
+	Dependencies []string
+	Commands     []string
 }
 
 type MacroDefinition struct {

@@ -41,7 +41,7 @@ func (t fileTask) getAge() int64 {
 }
 
 func newTask(dfn typedefs.TaskDefinition) task {
-	_, err := os.Stat(dfn.NormalizedName)
+	_, err := os.Stat(dfn.Name)
 	if err != nil {
 		return ruleTask{executionItem{dfn.Pos, dfn.Name, dfn.Commands}}
 	}

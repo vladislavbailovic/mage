@@ -36,7 +36,7 @@ func debugTaskDefinitions(tds map[string]typedefs.TaskDefinition) {
 	for n, t := range tds {
 		fmt.Printf(
 			"[%v] (%v), at %s %d:%d:\n",
-			n, t.NormalizedName,
+			n, t.Name,
 			t.Pos.File,
 			t.Pos.Line,
 			t.Pos.Char,
