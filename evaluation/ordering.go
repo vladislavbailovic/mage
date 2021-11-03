@@ -21,8 +21,8 @@ func getEvaluationSubstackFrom(start string, dfns map[string]typedefs.TaskDefini
 	}
 
 	var err error
-	for _, dependency := range root.Dependencies {
-		dependency = strings.TrimSpace(dependency) // @TODO: lexer issue, fix
+	for i := len(root.Dependencies) - 1; i >= 0; i-- {
+		dependency := strings.TrimSpace(root.Dependencies[i]) // @TODO: lexer issue, fix
 		stack, err = getEvaluationSubstackFrom(dependency, dfns, stack)
 		if err != nil {
 			return nil, err
