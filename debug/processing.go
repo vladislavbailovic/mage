@@ -1,20 +1,20 @@
-package processing
+package debug
 
 import (
 	"fmt"
 	"mage/typedefs"
 )
 
-func debugMacroDefinitions(mds map[string]typedefs.MacroDefinition) {
+func MacroDefinitions(mds map[string]typedefs.MacroDefinition) {
 	for n, m := range mds {
 		fmt.Printf("- [%s]:\n", n)
 		for _, t := range m.Tokens {
-			fmt.Printf("\t> [%s] (%s)\n", toktype(t.Kind), t.Value)
+			fmt.Printf("\t> [%s] (%s)\n", GetTokenType(t.Kind), t.Value)
 		}
 	}
 }
 
-func debugTaskDefinitions(tds map[string]typedefs.TaskDefinition) {
+func TaskDefinitions(tds map[string]typedefs.TaskDefinition) {
 	for n, t := range tds {
 		fmt.Printf(
 			"[%v] (%v), at %s %d:%d:\n",
@@ -35,9 +35,9 @@ func debugTaskDefinitions(tds map[string]typedefs.TaskDefinition) {
 	}
 }
 
-func debugTokens(tokens []typedefs.Token) {
+func Tokens(tokens []typedefs.Token) {
 	for idx, token := range tokens {
-		fmt.Printf("%d: (%s) ", idx, toktype(token.Kind))
+		fmt.Printf("%d: (%s) ", idx, GetTokenType(token.Kind))
 		fmt.Printf(
 			"[%s, %d:%d] [%v]\n",
 			token.Pos.File,
@@ -48,7 +48,7 @@ func debugTokens(tokens []typedefs.Token) {
 	}
 }
 
-func toktype(kind typedefs.TokenType) string {
+func GetTokenType(kind typedefs.TokenType) string {
 	switch kind {
 	case typedefs.TOKEN_WORD:
 		return "word"
@@ -76,13 +76,13 @@ func toktype(kind typedefs.TokenType) string {
 	return "UNKNOWN"
 }
 
-func tokenError(tk typedefs.Token, msg string) error {
+func TokenError(tk typedefs.Token, msg string) error {
 	return fmt.Errorf(
 		"ERROR: %s %d %d (%v): %v",
 		tk.Pos.File,
 		tk.Pos.Line,
 		tk.Pos.Char,
-		toktype(tk.Kind),
+		GetTokenType(tk.Kind),
 		msg,
 	)
 

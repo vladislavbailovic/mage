@@ -37,8 +37,8 @@ func Test_Ordering(t *testing.T) {
 
 	for idx, taskName := range expected {
 		actual := tasks[idx]
-		if taskName != actual.getName() {
-			t.Fatalf("expected %s at position %d - got %s instead", taskName, idx, actual.getName())
+		if taskName != actual.GetName() {
+			t.Fatalf("expected %s at position %d - got %s instead", taskName, idx, actual.GetName())
 		}
 	}
 }

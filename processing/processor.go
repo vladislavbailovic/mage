@@ -8,6 +8,7 @@ import (
 	"path"
 	"strings"
 
+	"mage/debug"
 	"mage/shell"
 	"mage/typedefs"
 )
@@ -39,7 +40,7 @@ func process(tokens []typedefs.Token) (map[string]typedefs.TaskDefinition, error
 					break
 				}
 				if tokens[j].Kind != typedefs.TOKEN_WORD {
-					return nil, tokenError(tokens[j], "only words allowed in commands")
+					return nil, debug.TokenError(tokens[j], "only words allowed in commands")
 				}
 				currentCommand = append(currentCommand, tokens[j].Value)
 			}
@@ -63,12 +64,12 @@ func process(tokens []typedefs.Token) (map[string]typedefs.TaskDefinition, error
 			rulePos = tokens[i].Pos
 			i += 1
 			if tokens[i].Kind != typedefs.TOKEN_WORD {
-				return nil, tokenError(tokens[i], "rule name has to be a word")
+				return nil, debug.TokenError(tokens[i], "rule name has to be a word")
 			}
 			ruleName = tokens[i].Value
 			old, ok := result[ruleName]
 			if ok {
-				return nil, tokenError(tokens[i], fmt.Sprintf("rule [%s] already exists (defined at %s: %d, %d)", ruleName, old.Pos.File, old.Pos.Line, old.Pos.Char))
+				return nil, debug.TokenError(tokens[i], fmt.Sprintf("rule [%s] already exists (defined at %s: %d, %d)", ruleName, old.Pos.File, old.Pos.Line, old.Pos.Char))
 			}
 			i += 1
 			for j := i; j < len(tokens); j++ {
@@ -76,7 +77,7 @@ func process(tokens []typedefs.Token) (map[string]typedefs.TaskDefinition, error
 					break
 				}
 				if tokens[j].Kind != typedefs.TOKEN_WORD {
-					return nil, tokenError(tokens[j], "dependency not a word")
+					return nil, debug.TokenError(tokens[j], "dependency not a word")
 				}
 				dependencies = append(dependencies, tokens[j].Value)
 			}

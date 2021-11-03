@@ -10,7 +10,7 @@ func Test_TokenizeIncludes(t *testing.T) {
 	lines, _ := shell.LoadFile("../fixtures/includes.mg")
 	tkn := newTokenizer("macro.mg", lines)
 	rawTokens := tkn.tokenize()
-	// debugTokens(rawTokens)
+	// debug.Tokens(rawTokens)
 	if len(rawTokens) <= 0 {
 		t.Fatalf("should at least have some raw tokens")
 	}
@@ -25,7 +25,7 @@ func Test_PreprocessIncludes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("preprocessing includes error: %s", err)
 	}
-	// debugTokens(tokens)
+	// debug.Tokens(tokens)
 	if 128 != len(tokens) {
 		t.Fatalf("expected exactly 128 tokens with includes, got %d", len(tokens))
 	}
@@ -47,7 +47,7 @@ func Test_ApplyIncludes(t *testing.T) {
 		t.Fatalf("macros expansion failed")
 	}
 
-	// debugTokens(tokens)
+	// debug.Tokens(tokens)
 	if 102 != len(tokens) {
 		t.Fatalf("expected exactly 102 tokens with includes, got %d", len(tokens))
 	}

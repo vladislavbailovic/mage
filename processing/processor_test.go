@@ -14,7 +14,7 @@ func Test_Process(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected processing to succeed")
 	}
-	//debugTaskDefinitions(dfns)
+	//debug.TaskDefinitions(dfns)
 	if len(dfns) != 2 {
 		t.Fatalf("expected 2 task definitions, but got %d", len(dfns))
 	}
