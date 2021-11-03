@@ -65,29 +65,29 @@ func Test_WordPositions(t *testing.T) {
 	tokens := tkn.tokenize()
 	expecteds := [][]int{
 		//[]int{1,1}, // "macro" gets nerfed
-		[]int{1, 7},
-		[]int{1, 12},
-		[]int{1, 21},
-		[]int{1, 26},
-		[]int{1, 32},
-		[]int{1, 37},
-		[]int{1, 40},
+		[]int{1, 8},
+		[]int{1, 13},
+		[]int{1, 22},
+		[]int{1, 27},
+		[]int{1, 33},
+		[]int{1, 38},
+		[]int{1, 41},
 		// macro OTHER $(M3)
 		//[]int{2,1}, // "macro" gets nerfed
-		[]int{2, 7},
-		[]int{2, 13},
+		[]int{2, 8},
+		[]int{2, 14},
 		// macro M3 $(M4)
 		//[]int{3,1}, // "macro" gets nerfed
-		[]int{3, 7},
-		[]int{3, 10},
+		[]int{3, 8},
+		[]int{3, 11},
 		// macro M4 $(NAME)
 		//[]int{4,1}, // "macro" gets nerfed
-		[]int{4, 7},
-		[]int{4, 10},
+		[]int{4, 8},
+		[]int{4, 11},
 		// macro M5 $(NAME)
 		//[]int{5,1}, // "macro" gets nerfed
-		[]int{5, 7},
-		[]int{5, 10},
+		[]int{5, 8},
+		[]int{5, 11},
 		// root: tmp/whatever.test
 		[]int{7, 1},
 		[]int{7, 6},
@@ -130,7 +130,7 @@ func Test_TokenizerSetsProperPositions_MacroDfn(t *testing.T) {
 	tkn := newTokenizer("macro.mg", strings.Join(lines, "\n"))
 	tkn.tokenize()
 	for _, tk := range tkn.filter(typedefs.TOKEN_MACRO_DFN_OPEN) {
-		if tk.Pos.Char != 7 {
+		if tk.Pos.Char != 8 {
 			t.Fatalf("macro dfn should start at 7 (because keyword gets dropped), got %d", tk.Pos.Char)
 		}
 	}
@@ -167,13 +167,13 @@ func Test_TokenizerSetsProperPositions_MacroCall(t *testing.T) {
 	tkn.tokenize()
 
 	co := tkn.filter(typedefs.TOKEN_MACRO_CALL_OPEN)
-	if co[0].Pos.Char != 13 {
+	if co[0].Pos.Char != 14 {
 		t.Fatalf("first call should start at c13, got c%d", co[0].Pos.Char)
 	}
 	if co[0].Pos.Line != 2 {
 		t.Fatalf("first call should start at l2, got l%d", co[0].Pos.Line)
 	}
-	if co[1].Pos.Char != 10 {
+	if co[1].Pos.Char != 11 {
 		t.Fatalf("2nd call should start at c10, got c%d", co[1].Pos.Char)
 	}
 	if co[1].Pos.Line != 3 {
