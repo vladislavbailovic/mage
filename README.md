@@ -23,14 +23,14 @@ Features:
 - Tasks have dependencies on other tasks or files
 - Tasks cannot be redefined
 - Execution order:
-	0. Select a task:
+	1. Select a task:
 		- If called with task argument, use that
 		- Otherwise, use first task in the file
-	1. Determine our epoch time:
+	2. Determine our epoch time:
 		- Specific time
 		- Task time (last called time for this specific task)
 		- Build time (last time we built anything)
-	2. Build evaluation stack
+	3. Build evaluation stack
 - Task evaluation order:
 	1. Get a list of dependencies:
 		- Evaluate dependencies in reverse order they're listed
