@@ -13,9 +13,7 @@ func Test_Preprocessor(t *testing.T) {
 	if err != nil {
 		t.Fatalf("preprocessing error: %s", err)
 	}
-	for _,tk := range tokens {
-		t.Logf("> %s (%s)\n", tk.Value, toktype(tk.Kind))
-	}
+	// dbgtokens(tokens)
 	if len(tokens) >= len(rawTokens) {
 		t.Fatalf("expected macros to be removed from tokens, got %d", len(tokens))
 	}

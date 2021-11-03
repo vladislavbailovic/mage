@@ -32,6 +32,19 @@ func dbgdefs(mds map[string]typedefs.MacroDefinition) {
 	}
 }
 
+func dbgtokens(tokens []typedefs.Token) {
+	for idx, token := range tokens {
+		fmt.Printf("%d: %s\n", idx, toktype(token.Kind))
+		fmt.Printf(
+			"  > %s, %d:%d [%v]\n",
+			token.Pos.File,
+			token.Pos.Line,
+			token.Pos.Char,
+			token.Value,
+		)
+	}
+}
+
 func toktype(kind typedefs.TokenType) string {
 	switch(kind) {
 	case typedefs.TOKEN_WORD:
