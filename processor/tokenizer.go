@@ -1,5 +1,8 @@
 package processor
 
+// Builds a list of tokens to be used further in the
+// processing pipeline.
+
 import (
 	"mage/typedefs"
 )

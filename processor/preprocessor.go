@@ -1,5 +1,7 @@
 package processor
 
+// Preprocesses the list of tokens by expanding macros.
+
 import (
 	"fmt"
 	"mage/typedefs"
