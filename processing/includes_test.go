@@ -51,3 +51,28 @@ func Test_ApplyIncludes(t *testing.T) {
 		t.Fatalf("expected exactly 102 tokens with includes, got %d", len(tokens))
 	}
 }
+
+func Test_RecursiveInclusionShouldErrorOut(t *testing.T) {
+	filepath := "../fixtures/recursive-inclusion.mg"
+	lines, _ := shell.LoadFile(filepath)
+	tkn := newTokenizer(filepath, lines)
+	_, err := preprocessIncludes(tkn.tokenize())
+	if err == nil {
+		t.Log(err)
+		t.Fatalf("expected to fail after too many inclusions")
+	}
+}
+
+func Test_MultilevelInclusionShouldWork(t *testing.T) {
+	filepath := "../fixtures/double-include-parent.mg"
+	lines, _ := shell.LoadFile(filepath)
+	tkn := newTokenizer(filepath, lines)
+	tokens, err := preprocessIncludes(tkn.tokenize())
+	if err != nil {
+		t.Log(err)
+		t.Fatalf("multi-level include should work")
+	}
+	if len(tokens) != 87 {
+		t.Fatalf("expected exactly 87 tokens in multi-level include, got %d", len(tokens))
+	}
+}

@@ -20,32 +20,37 @@ func preprocess(tokens []typedefs.Token) ([]typedefs.Token, error) {
 }
 
 func preprocessIncludes(tokens []typedefs.Token) ([]typedefs.Token, error) {
-	result := []typedefs.Token{}
-	for i := 0; i < len(tokens); i++ {
-		if tokens[i].Kind != typedefs.TOKEN_INCLUDE_CALL_OPEN {
-			result = append(result, tokens[i])
-			continue
-		}
-		i += 1
-		if tokens[i].Kind != typedefs.TOKEN_WORD {
-			return nil, debug.TokenError(tokens[i], "include can only have words")
-		}
-		filepath := tokens[i].Value
-		loadedTokens, err := includeFile(filepath, tokens[i].Pos.File)
-		if err != nil {
-			return nil, err
-		}
-		for _, tk := range loadedTokens {
-			result = append(result, tk)
-		}
-		for j := i; j < len(tokens); j++ {
-			if tokens[i].Kind == typedefs.TOKEN_INCLUDE_CALL_CLOSE {
-				break
+	for safety := 0; safety < MACRO_EXPANSION_RECURSE_LIMIT; safety++ {
+		changed := false
+		result := []typedefs.Token{}
+		for i := 0; i < len(tokens); i++ {
+			if tokens[i].Kind != typedefs.TOKEN_INCLUDE_CALL_OPEN {
+				continue
 			}
+			start := i
+			end := i + 3
 			i += 1
+			if tokens[i].Kind != typedefs.TOKEN_WORD {
+				return nil, debug.TokenError(tokens[i], "include can only have words")
+			}
+			filepath := tokens[i].Value
+			loadedTokens, err := includeFile(filepath, tokens[i].Pos.File)
+			if err != nil {
+				return nil, err
+			}
+			result = append(result, tokens[:start]...)
+			result = append(result, loadedTokens...)
+			result = append(result, tokens[end:]...)
+			fmt.Printf("Iteration %d::%d: total %d\n", safety, i, len(tokens))
+			changed = true
+			break
 		}
+		if !changed {
+			return tokens, nil
+		}
+		tokens = result[:]
 	}
-	return result, nil
+	return nil, fmt.Errorf("exceeded includes recursion")
 }
 
 func preprocessMacros(tokens []typedefs.Token) ([]typedefs.Token, error) {
