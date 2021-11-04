@@ -41,7 +41,6 @@ func preprocessIncludes(tokens []typedefs.Token) ([]typedefs.Token, error) {
 			result = append(result, tokens[:start]...)
 			result = append(result, loadedTokens...)
 			result = append(result, tokens[end:]...)
-			fmt.Printf("Iteration %d::%d: total %d\n", safety, i, len(tokens))
 			changed = true
 			break
 		}
