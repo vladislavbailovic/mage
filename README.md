@@ -41,3 +41,4 @@ Features:
 	4. If dependency is new in our epoch, select it as task and goto 1
 	5. Add task content to execution stack
 - Execute stack
+- Can compile scripts
