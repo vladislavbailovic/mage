@@ -7,8 +7,8 @@ TODO:
 
 - [X] Implement evaluation stack creation
 - [X] Implement evaulation stack processing
-- [ ] Implement initial task selection
 - [ ] Implement CLI runner
+- [ ] Implement initial task selection
 - [ ] Implement result reporting
 - [ ] Spaces are significant (at least in command definitions)
 

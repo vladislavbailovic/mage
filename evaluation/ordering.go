@@ -9,6 +9,11 @@ import (
 // Accepts a set of task definitions and start point, and
 // orders them into an execution stack
 
+// @TODO pick entry point task
+func GetEvaluationStack(start string, dfns map[string]typedefs.TaskDefinition) ([]typedefs.Task, error) {
+	return getEvaluationStackFrom(start, dfns)
+}
+
 func getEvaluationStackFrom(start string, dfns map[string]typedefs.TaskDefinition) ([]typedefs.Task, error) {
 	stack := []typedefs.Task{}
 	return getEvaluationSubstackFrom(start, dfns, stack)

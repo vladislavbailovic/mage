@@ -1,41 +1,34 @@
 package main
 
-// import (
-// 	"fmt"
-// 	"os"
-
-// 	"mage/processor"
-// 	"mage/ruleset"
-// )
+import (
+	"flag"
+	"fmt"
+	"mage/evaluation"
+	"mage/processing"
+	"os"
+)
 
 const (
-	FIXTURE string = "fixtures/macro.mg"
+	FIXTURE      string = "fixtures/macro.mg"
 	RECORD_STORE string = "tmp/test.json"
-	ROOT_TASK string = "root"
+	ROOT_TASK    string = "root"
 )
 
 func main() {
-	// evaluateRules()
+	file := flag.String("f", FIXTURE, "File to process")
+	flag.Parse()
+
+	dfns, errD := processing.ProcessFile(*file)
+	if errD != nil {
+		fmt.Println(errD)
+		os.Exit(1)
+	}
+
+	tasks, errT := evaluation.GetEvaluationStack("root", dfns)
+	if errT != nil {
+		fmt.Println(errT)
+		os.Exit(1)
+	}
+
+	fmt.Println(evaluation.Compile(tasks))
 }
-
-// func evaluateRules() {
-// 	parser, err := processor.NewParser(FIXTURE)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		os.Exit(1)
-// 	}
-
-// 	store := ruleset.NewRecordStore(RECORD_STORE)
-// 	myAge := int64(store.GetTime(ROOT_TASK))
-// 	stack, err := ruleset.GetStack(ROOT_TASK, parser)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		os.Exit(1)
-// 	}
-
-// 	ruleset.EvaluateStack(stack, myAge, store)
-
-// 	store.RecordTime("root")
-// 	store.Save()
-// }
-
