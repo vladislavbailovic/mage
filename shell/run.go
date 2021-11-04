@@ -32,10 +32,14 @@ func (c *Command) Run() error {
 		return fmt.Errorf("not enough arguments for command")
 	}
 	args := []string{"-c"}
-	out, err := exec.Command("sh", append(args, c.raw...)...).Output()
+	out, err := exec.Command(GetShellBinary(), append(args, c.raw...)...).Output()
 	if err != nil {
 		return err
 	}
 	c.out = out
 	return nil
+}
+
+func GetShellBinary() string {
+	return "/bin/sh"
 }

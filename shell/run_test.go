@@ -49,3 +49,10 @@ func Test_RunCommand(t *testing.T) {
 		t.Fatalf("expected ls to return files list")
 	}
 }
+
+func Test_GetShellBinaryDefaultsToBinSh(t *testing.T) {
+	bin := GetShellBinary()
+	if "/bin/sh" != bin {
+		t.Fatalf("expected /bin/sh as default shell binary, got %s", bin)
+	}
+}
