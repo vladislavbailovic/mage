@@ -5,8 +5,7 @@ Mage - task runner in go
 TODO:
 -----
 
-- [X] Implement evaluation stack creation
-- [X] Implement evaulation stack processing
+- [ ] Implement shell command expansion in macro definitions
 - [ ] Implement CLI runner
 - [ ] Implement initial task selection
 - [ ] Implement result reporting
