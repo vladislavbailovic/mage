@@ -1,6 +1,7 @@
 package processing
 
 import (
+	"mage/debug"
 	"mage/shell"
 	"testing"
 )
@@ -19,7 +20,7 @@ func Test_PreprocessorDoesIncludes(t *testing.T) {
 	filepath := "../fixtures/includes.mg"
 	lines, _ := shell.LoadFile(filepath)
 	tkn := newTokenizer(filepath, lines)
-	proc := NewPreprocessor(tkn.tokenize())
+	proc := newPreprocessor(tkn.tokenize())
 	err := proc.doIncludes()
 	if err != nil {
 		t.Fatalf("preprocessing includes error: %s", err)
@@ -34,7 +35,7 @@ func Test_PreprocessorAppliesIncludes(t *testing.T) {
 	filepath := "../fixtures/includes.mg"
 	lines, _ := shell.LoadFile(filepath)
 	tkn := newTokenizer(filepath, lines)
-	proc := NewPreprocessor(tkn.tokenize())
+	proc := newPreprocessor(tkn.tokenize())
 	err := proc.doIncludes()
 	if err != nil {
 		t.Log(err)
@@ -47,7 +48,7 @@ func Test_PreprocessorAppliesIncludes(t *testing.T) {
 		t.Fatalf("macros expansion failed")
 	}
 
-	// debug.Tokens(proc.tokens)
+	debug.Tokens(proc.tokens)
 	if 102 != len(proc.tokens) {
 		t.Fatalf("expected exactly 102 tokens with includes, got %d", len(proc.tokens))
 	}
@@ -57,7 +58,7 @@ func Test_RecursiveInclusionShouldErrorOut(t *testing.T) {
 	filepath := "../fixtures/recursive-inclusion.mg"
 	lines, _ := shell.LoadFile(filepath)
 	tkn := newTokenizer(filepath, lines)
-	proc := NewPreprocessor(tkn.tokenize())
+	proc := newPreprocessor(tkn.tokenize())
 	err := proc.doIncludes()
 	if err == nil {
 		t.Log(err)
@@ -69,7 +70,7 @@ func Test_MultilevelInclusionShouldWork(t *testing.T) {
 	filepath := "../fixtures/double-include-parent.mg"
 	lines, _ := shell.LoadFile(filepath)
 	tkn := newTokenizer(filepath, lines)
-	proc := NewPreprocessor(tkn.tokenize())
+	proc := newPreprocessor(tkn.tokenize())
 	err := proc.doIncludes()
 	if err != nil {
 		t.Log(err)

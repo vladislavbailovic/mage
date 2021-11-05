@@ -1,6 +1,7 @@
 package processing
 
 import (
+	"mage/debug"
 	"mage/shell"
 	"testing"
 )
@@ -12,6 +13,8 @@ func Test_Process(t *testing.T) {
 	tokens, _ := preprocess(rawTokens)
 	dfns, err := process(tokens)
 	if err != nil {
+		debug.Tokens(tokens)
+		t.Log(err)
 		t.Fatalf("expected processing to succeed")
 	}
 	//debug.TaskDefinitions(dfns)

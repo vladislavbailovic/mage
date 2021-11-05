@@ -21,7 +21,7 @@ type preprocessor struct {
 	currentPos     int
 }
 
-func NewPreprocessor(tokens []typedefs.Token) *preprocessor {
+func newPreprocessor(tokens []typedefs.Token) *preprocessor {
 	return &preprocessor{tokens, map[string]typedefs.MacroDefinition{}, []string{}, []string{}, MACRO_EXPANSION_RECURSE_LIMIT, 0}
 }
 
@@ -34,11 +34,19 @@ func (p *preprocessor) run() error {
 }
 
 func preprocess(tokens []typedefs.Token) ([]typedefs.Token, error) {
-	combined, err := preprocessIncludes(tokens)
+	proc := newPreprocessor(tokens)
+
+	err := proc.doIncludes()
 	if err != nil {
 		return nil, err
 	}
-	return preprocessMacros(combined)
+
+	err = proc.doMacros()
+	if err != nil {
+		return nil, err
+	}
+
+	return proc.tokens, nil
 }
 
 func (p *preprocessor) doIncludes() error {
@@ -70,39 +78,6 @@ func (p *preprocessor) doIncludes() error {
 	return fmt.Errorf("exceeded includes recursion")
 }
 
-func preprocessIncludes(tokens []typedefs.Token) ([]typedefs.Token, error) {
-	for safety := 0; safety < MACRO_EXPANSION_RECURSE_LIMIT; safety++ {
-		changed := false
-		result := []typedefs.Token{}
-		for i := 0; i < len(tokens); i++ {
-			if tokens[i].Kind != typedefs.TOKEN_INCLUDE_CALL_OPEN {
-				continue
-			}
-			start := i
-			end := i + 3
-			i += 1
-			if tokens[i].Kind != typedefs.TOKEN_WORD {
-				return nil, debug.TokenError(tokens[i], "include can only have words")
-			}
-			filepath := tokens[i].Value
-			loadedTokens, err := includeFile(filepath, tokens[i].Pos.File)
-			if err != nil {
-				return nil, err
-			}
-			result = append(result, tokens[:start]...)
-			result = append(result, loadedTokens...)
-			result = append(result, tokens[end:]...)
-			changed = true
-			break
-		}
-		if !changed {
-			return tokens, nil
-		}
-		tokens = result[:]
-	}
-	return nil, fmt.Errorf("exceeded includes recursion")
-}
-
 func (p *preprocessor) includeFile(from typedefs.Token, at int) (bool, error) {
 	if p.nextType(typedefs.TOKEN_INCLUDE_CALL_CLOSE) != nil {
 		return false, p.tokenErrorAt(at, "unfinished include")
@@ -127,9 +102,9 @@ func (p *preprocessor) includeFile(from typedefs.Token, at int) (bool, error) {
 }
 
 func (p *preprocessor) nextType(kind typedefs.TokenType) error {
-	for p.currentPos < len(p.tokens)-1 {
+	for p.currentPos < len(p.tokens) {
 		if p.tokens[p.currentPos].Kind != kind {
-			p.currentPos++
+			p.currentPos += 1
 			continue
 		}
 		return nil
@@ -139,7 +114,7 @@ func (p *preprocessor) nextType(kind typedefs.TokenType) error {
 
 func (p *preprocessor) next() error {
 	if p.currentPos < len(p.tokens) {
-		p.currentPos++
+		p.currentPos += 1
 		return nil
 	}
 	return fmt.Errorf("no more tokens")
@@ -168,6 +143,7 @@ func (p *preprocessor) stripMacroDefinitions() error {
 			for p.current().Kind != typedefs.TOKEN_MACRO_DFN_CLOSE {
 				p.currentPos++
 			}
+			continue
 		}
 		result = append(result, p.current())
 	}
@@ -200,7 +176,8 @@ func (p *preprocessor) doMacros() error {
 
 func (p *preprocessor) expandMacros() error {
 	result := []typedefs.Token{}
-	for p.currentPos = 0; p.currentPos < len(p.tokens); p.currentPos++ {
+
+	for p.currentPos < len(p.tokens) {
 		if p.current().Kind == typedefs.TOKEN_MACRO_CALL_OPEN {
 			p.next()
 			if p.current().Kind != typedefs.TOKEN_WORD {
@@ -214,6 +191,7 @@ func (p *preprocessor) expandMacros() error {
 			if p.current().Kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
 				return p.tokenError("macro call not closed")
 			}
+			p.next()
 
 			macro, ok := p.macros[macroName]
 			if !ok {
@@ -223,69 +201,58 @@ func (p *preprocessor) expandMacros() error {
 			for _, tk := range macro.Tokens {
 				result = append(result, tk)
 			}
-
-			p.next()
 			continue
 		}
 		result = append(result, p.current())
+		p.next()
 	}
 
 	p.tokens = result[:]
 	return nil
 }
 
-func preprocessMacros(tokens []typedefs.Token) ([]typedefs.Token, error) {
-	macros, err := getMacroDefinitions(tokens)
-	if err != nil {
-		return nil, err
-	}
-	result := []typedefs.Token{}
+// func preprocessMacros(tokens []typedefs.Token) ([]typedefs.Token, error) {
+// 	macros, err := getMacroDefinitions(tokens)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	result := []typedefs.Token{}
 
-	for i := 0; i < len(tokens); i++ {
-		if tokens[i].Kind == typedefs.TOKEN_MACRO_DFN_OPEN {
-			// SKip over macro definitions, already have those
-			for tokens[i].Kind != typedefs.TOKEN_MACRO_DFN_CLOSE {
-				i += 1
-			}
-			continue
-		}
+// 	for i := 0; i < len(tokens); i++ {
+// 		if tokens[i].Kind == typedefs.TOKEN_MACRO_DFN_OPEN {
+// 			// SKip over macro definitions, already have those
+// 			for tokens[i].Kind != typedefs.TOKEN_MACRO_DFN_CLOSE {
+// 				i += 1
+// 			}
+// 			continue
+// 		}
 
-		if tokens[i].Kind == typedefs.TOKEN_MACRO_CALL_OPEN {
-			// Expand macro calls
-			i += 1
-			if tokens[i].Kind != typedefs.TOKEN_WORD {
-				return nil, debug.TokenError(tokens[i], fmt.Sprintf("expected word as macro name, got [%v]", debug.GetTokenType(tokens[i].Kind)))
-			}
-			if tokens[i+1].Kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
-				return nil, debug.TokenError(tokens[i], "macro call not closed")
-			}
-			macroName := tokens[i].Value
-			macro, ok := macros[macroName]
-			if !ok {
-				return nil, debug.TokenError(tokens[i], fmt.Sprintf("unknown macro: [%v]", macroName))
-			}
-			for _, tk := range macro.Tokens {
-				result = append(result, tk)
-			}
-			i += 1
-			continue
-		}
+// 		if tokens[i].Kind == typedefs.TOKEN_MACRO_CALL_OPEN {
+// 			// Expand macro calls
+// 			i += 1
+// 			if tokens[i].Kind != typedefs.TOKEN_WORD {
+// 				return nil, debug.TokenError(tokens[i], fmt.Sprintf("expected word as macro name, got [%v]", debug.GetTokenType(tokens[i].Kind)))
+// 			}
+// 			if tokens[i+1].Kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
+// 				return nil, debug.TokenError(tokens[i], "macro call not closed")
+// 			}
+// 			macroName := tokens[i].Value
+// 			macro, ok := macros[macroName]
+// 			if !ok {
+// 				return nil, debug.TokenError(tokens[i], fmt.Sprintf("unknown macro: [%v]", macroName))
+// 			}
+// 			for _, tk := range macro.Tokens {
+// 				result = append(result, tk)
+// 			}
+// 			i += 1
+// 			continue
+// 		}
 
-		result = append(result, tokens[i])
-	}
+// 		result = append(result, tokens[i])
+// 	}
 
-	return result, nil
-}
-
-func includeFile(filepath string, relativeToSource string) ([]typedefs.Token, error) {
-	relpath := shell.PathRelativeTo(filepath, relativeToSource)
-	lines, err := shell.LoadFile(relpath)
-	if err != nil {
-		return nil, err
-	}
-	tkn := newTokenizer(relpath, lines)
-	return tkn.tokenize(), nil
-}
+// 	return result, nil
+// }
 
 func (p *preprocessor) doMacroDefinitions() error {
 	dfns, err := getRawMacroDefinitions(p.tokens)
@@ -330,14 +297,14 @@ func (dc *dfnCollection) process() (bool, error) {
 }
 
 func (dc *dfnCollection) processDfn(name string) (bool, error) {
-	changed := false
+	somethingChanged := false
 	for idx, token := range dc.dfns[name].Tokens {
 		if token.Kind != typedefs.TOKEN_MACRO_CALL_OPEN {
 			continue
 		}
 		next := dc.dfns[name].Tokens[idx+1]
 		if next.Kind != typedefs.TOKEN_WORD {
-			return changed, debug.TokenError(
+			return somethingChanged, debug.TokenError(
 				next, fmt.Sprintf("macro call has to be a word, not [%v]", debug.GetTokenType(next.Kind)))
 		}
 
@@ -346,14 +313,20 @@ func (dc *dfnCollection) processDfn(name string) (bool, error) {
 			if err != nil {
 				return changed, err
 			}
+			if changed {
+				somethingChanged = true
+			}
 		} else {
 			changed, err := dc.expandMacroIn(name, idx)
 			if err != nil {
 				return changed, err
 			}
+			if changed {
+				somethingChanged = true
+			}
 		}
 	}
-	return changed, nil
+	return somethingChanged, nil
 }
 
 func (dc *dfnCollection) expandMacroIn(name string, start int) (bool, error) {
@@ -409,83 +382,6 @@ func (dc *dfnCollection) expandShellcodeIn(name string, start int) (bool, error)
 	return true, nil
 }
 
-func getMacroDefinitions(tokens []typedefs.Token) (map[string]typedefs.MacroDefinition, error) {
-	dfns, err := getRawMacroDefinitions(tokens)
-	if err != nil {
-		return nil, err
-	}
-
-	// Prepare macro definitions by expanding calls
-	recursionCounter := 0
-	for recursionCounter < MACRO_EXPANSION_RECURSE_LIMIT {
-		didReplacement := false
-		for name, md := range dfns {
-			for idx, token := range md.Tokens {
-				if token.Kind != typedefs.TOKEN_MACRO_CALL_OPEN {
-					continue
-				}
-				nameTok := md.Tokens[idx+1]
-				if nameTok.Kind != typedefs.TOKEN_WORD {
-					return nil, debug.TokenError(nameTok, fmt.Sprintf("macro call has to be a word, not [%v]", debug.GetTokenType(nameTok.Kind)))
-				}
-
-				// @TODO this is horrible, refactor
-				var newTokens []typedefs.Token
-				var endIndex int
-				if "!" != string(nameTok.Value[0]) {
-					// Normal macro
-					macro, ok := dfns[nameTok.Value]
-					if !ok {
-						return nil, debug.TokenError(nameTok, fmt.Sprintf("unknown token [%v]", nameTok.Value))
-					}
-
-					closeTok := md.Tokens[idx+2]
-					if closeTok.Kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
-						return nil, debug.TokenError(closeTok, "macro call not closed off")
-					}
-					endIndex = idx + 3
-					newTokens = macro.Tokens
-				} else {
-					// Starts with "!" - shellcall macro
-					cmd := []string{nameTok.Value[1:]}
-					for i := idx + 2; i < len(md.Tokens); i++ {
-						// Can't mix shellcalls with nested macros.
-						if md.Tokens[i].Kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
-							cmd = append(cmd, md.Tokens[i].Value)
-							continue
-						}
-						endIndex = i + 1
-						break
-					}
-					if endIndex == 0 {
-						return nil, debug.TokenError(nameTok, "shellcall macro call not closed off")
-					}
-					command := shell.NewCommand([]string{strings.Join(cmd, " ")})
-					out, err := command.GetStdout()
-					if err != nil {
-						return nil, debug.TokenError(nameTok, fmt.Sprintf("[%v] shellcall error: [%v]", cmd, err))
-					}
-					newTokens = []typedefs.Token{
-						typedefs.Token{nameTok.Pos, typedefs.TOKEN_WORD, strings.TrimSpace(out)},
-					}
-				}
-
-				tks := append(md.Tokens[0:idx], newTokens...)
-				tks = append(tks, md.Tokens[endIndex:]...)
-				md.Tokens = tks
-				dfns[name] = md
-				didReplacement = true
-			}
-		}
-		recursionCounter++
-		if !didReplacement {
-			break
-		}
-	}
-
-	return dfns, nil
-}
-
 func getRawMacroDefinitions(tokens []typedefs.Token) (map[string]typedefs.MacroDefinition, error) {
 	result := map[string]typedefs.MacroDefinition{}
 
@@ -521,4 +417,14 @@ func getRawMacroDefinitions(tokens []typedefs.Token) (map[string]typedefs.MacroD
 	}
 
 	return result, nil
+}
+
+func includeFile(filepath string, relativeToSource string) ([]typedefs.Token, error) {
+	relpath := shell.PathRelativeTo(filepath, relativeToSource)
+	lines, err := shell.LoadFile(relpath)
+	if err != nil {
+		return nil, err
+	}
+	tkn := newTokenizer(relpath, lines)
+	return tkn.tokenize(), nil
 }
