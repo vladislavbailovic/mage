@@ -64,10 +64,10 @@ func (p *preprocessor) doIncludes() error {
 			break
 		}
 		if !changed {
-			break
+			return nil
 		}
 	}
-	return nil
+	return fmt.Errorf("exceeded includes recursion")
 }
 
 func preprocessIncludes(tokens []typedefs.Token) ([]typedefs.Token, error) {
@@ -127,7 +127,7 @@ func (p *preprocessor) includeFile(from typedefs.Token, at int) (bool, error) {
 }
 
 func (p *preprocessor) nextType(kind typedefs.TokenType) error {
-	for p.currentPos < len(p.tokens) {
+	for p.currentPos < len(p.tokens)-1 {
 		if p.tokens[p.currentPos].Kind != kind {
 			p.currentPos++
 			continue
@@ -161,11 +161,76 @@ func (p preprocessor) tokenError(msg string) error {
 	return p.tokenErrorAt(p.currentPos, msg)
 }
 
+func (p *preprocessor) stripMacroDefinitions() error {
+	result := []typedefs.Token{}
+	for p.currentPos = 0; p.currentPos < len(p.tokens); p.currentPos++ {
+		if p.current().Kind == typedefs.TOKEN_MACRO_DFN_OPEN {
+			for p.current().Kind != typedefs.TOKEN_MACRO_DFN_CLOSE {
+				p.currentPos++
+			}
+		}
+		result = append(result, p.current())
+	}
+
+	p.tokens = result[:]
+	return nil
+}
+
 func (p *preprocessor) doMacros() error {
+	p.reset()
 	err := p.doMacroDefinitions()
 	if err != nil {
 		return err
 	}
+
+	p.reset()
+	err = p.stripMacroDefinitions()
+	if err != nil {
+		return err
+	}
+
+	p.reset()
+	err = p.expandMacros()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *preprocessor) expandMacros() error {
+	result := []typedefs.Token{}
+	for p.currentPos = 0; p.currentPos < len(p.tokens); p.currentPos++ {
+		if p.current().Kind == typedefs.TOKEN_MACRO_CALL_OPEN {
+			p.next()
+			if p.current().Kind != typedefs.TOKEN_WORD {
+				return p.tokenError(fmt.Sprintf(
+					"expected word as macro name, got [%v]", debug.GetTokenType(p.current().Kind)))
+			}
+
+			macroName := p.current().Value
+
+			p.next()
+			if p.current().Kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
+				return p.tokenError("macro call not closed")
+			}
+
+			macro, ok := p.macros[macroName]
+			if !ok {
+				return p.tokenError(fmt.Sprintf("unknown macro: [%v]", macroName))
+			}
+
+			for _, tk := range macro.Tokens {
+				result = append(result, tk)
+			}
+
+			p.next()
+			continue
+		}
+		result = append(result, p.current())
+	}
+
+	p.tokens = result[:]
 	return nil
 }
 

@@ -1,7 +1,6 @@
 package processing
 
 import (
-	"mage/debug"
 	"mage/shell"
 	"testing"
 )
@@ -85,7 +84,7 @@ func Test_PreprocessorAppliesIncludes(t *testing.T) {
 		t.Fatalf("macros expansion failed")
 	}
 
-	debug.Tokens(proc.tokens)
+	// debug.Tokens(proc.tokens)
 	if 102 != len(proc.tokens) {
 		t.Fatalf("expected exactly 102 tokens with includes, got %d", len(proc.tokens))
 	}
@@ -95,7 +94,8 @@ func Test_RecursiveInclusionShouldErrorOut(t *testing.T) {
 	filepath := "../fixtures/recursive-inclusion.mg"
 	lines, _ := shell.LoadFile(filepath)
 	tkn := newTokenizer(filepath, lines)
-	_, err := preprocessIncludes(tkn.tokenize())
+	proc := NewPreprocessor(tkn.tokenize())
+	err := proc.doIncludes()
 	if err == nil {
 		t.Log(err)
 		t.Fatalf("expected to fail after too many inclusions")
