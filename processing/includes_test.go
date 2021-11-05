@@ -30,6 +30,21 @@ func Test_PreprocessIncludes(t *testing.T) {
 	}
 }
 
+func Test_PreprocessorDoesIncludes(t *testing.T) {
+	filepath := "../fixtures/includes.mg"
+	lines, _ := shell.LoadFile(filepath)
+	tkn := newTokenizer(filepath, lines)
+	proc := NewPreprocessor(tkn.tokenize())
+	err := proc.doIncludes()
+	if err != nil {
+		t.Fatalf("preprocessing includes error: %s", err)
+	}
+	// debug.Tokens(tokens)
+	if 128 != len(proc.tokens) {
+		t.Fatalf("expected exactly 128 tokens with includes, got %d", len(proc.tokens))
+	}
+}
+
 func Test_ApplyIncludes(t *testing.T) {
 	filepath := "../fixtures/includes.mg"
 	lines, _ := shell.LoadFile(filepath)

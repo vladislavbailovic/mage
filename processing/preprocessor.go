@@ -12,12 +12,66 @@ import (
 
 const MACRO_EXPANSION_RECURSE_LIMIT = 10
 
+type preprocessor struct {
+	tokens         []typedefs.Token
+	macros         []typedefs.MacroDefinition
+	includes       []string
+	shellcalls     []string
+	expansionDepth int
+	currentPos     int
+}
+
+func NewPreprocessor(tokens []typedefs.Token) *preprocessor {
+	return &preprocessor{tokens, []typedefs.MacroDefinition{}, []string{}, []string{}, MACRO_EXPANSION_RECURSE_LIMIT, 0}
+}
+
+func (p *preprocessor) run() error {
+	err := p.doIncludes()
+	if err != nil {
+		return err
+	}
+	return p.doMacros()
+}
+
+func (p *preprocessor) doMacros() error {
+	return nil
+}
+
 func preprocess(tokens []typedefs.Token) ([]typedefs.Token, error) {
 	combined, err := preprocessIncludes(tokens)
 	if err != nil {
 		return nil, err
 	}
 	return preprocessMacros(combined)
+}
+
+func (p *preprocessor) doIncludes() error {
+	for depth := 0; depth < p.expansionDepth; depth++ {
+		changed := false
+		var err error
+		p.reset()
+		for p.nextType(typedefs.TOKEN_INCLUDE_CALL_OPEN) == nil {
+			at := p.currentPos
+			if p.next() != nil {
+				return p.tokenError("unfinished include")
+			}
+
+			include := p.current()
+			if include.Kind != typedefs.TOKEN_WORD {
+				return p.tokenError("include can only have words")
+			}
+
+			changed, err = p.includeFile(include, at)
+			if err != nil {
+				return err
+			}
+			break
+		}
+		if !changed {
+			break
+		}
+	}
+	return nil
 }
 
 func preprocessIncludes(tokens []typedefs.Token) ([]typedefs.Token, error) {
@@ -51,6 +105,64 @@ func preprocessIncludes(tokens []typedefs.Token) ([]typedefs.Token, error) {
 		tokens = result[:]
 	}
 	return nil, fmt.Errorf("exceeded includes recursion")
+}
+
+func (p *preprocessor) includeFile(from typedefs.Token, at int) (bool, error) {
+	if p.nextType(typedefs.TOKEN_INCLUDE_CALL_CLOSE) != nil {
+		return false, p.tokenErrorAt(at, "unfinished include")
+	}
+	end := p.currentPos + 1
+
+	loaded, err := includeFile(from.Value, from.Pos.File)
+	if err != nil {
+		return false, err
+	}
+	if len(loaded) == 0 {
+		return false, nil
+	}
+
+	result := []typedefs.Token{}
+	result = append(result, p.tokens[:at]...)
+	result = append(result, loaded...)
+	result = append(result, p.tokens[end:]...)
+
+	p.tokens = result[:]
+	return true, nil
+}
+
+func (p *preprocessor) nextType(kind typedefs.TokenType) error {
+	for p.currentPos < len(p.tokens) {
+		if p.tokens[p.currentPos].Kind != kind {
+			p.currentPos++
+			continue
+		}
+		return nil
+	}
+	return fmt.Errorf("unable to find [%v]", debug.GetTokenType(kind))
+}
+
+func (p *preprocessor) next() error {
+	if p.currentPos < len(p.tokens) {
+		p.currentPos++
+		return nil
+	}
+	return fmt.Errorf("no more tokens")
+}
+
+func (p preprocessor) current() typedefs.Token {
+	return p.tokens[p.currentPos]
+}
+
+func (p *preprocessor) reset() {
+	p.currentPos = 0
+}
+
+func (p preprocessor) tokenErrorAt(pos int, msg string) error {
+	return debug.TokenError(p.tokens[pos], msg)
+}
+
+func (p preprocessor) tokenError(msg string) error {
+	return p.tokenErrorAt(p.currentPos, msg)
 }
 
 func preprocessMacros(tokens []typedefs.Token) ([]typedefs.Token, error) {
