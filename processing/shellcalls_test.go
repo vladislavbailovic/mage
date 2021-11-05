@@ -1,7 +1,6 @@
 package processing
 
 import (
-	"mage/debug"
 	"mage/shell"
 	"testing"
 )
@@ -14,8 +13,8 @@ func Test_PreprocessorShellcallMacros(t *testing.T) {
 	if err != nil {
 		t.Fatalf("preprocessing error: %s", err)
 	}
-	t.Log(err)
-	debug.Tokens(tokens)
+	t.Log(err, tokens)
+	// debug.Tokens(tokens)
 	// if len(tokens) >= len(rawTokens) {
 	// 	t.Fatalf("expected macros to be removed from tokens, got %d", len(tokens))
 	// }
