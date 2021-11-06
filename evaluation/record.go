@@ -3,15 +3,14 @@ package evaluation
 import (
 	"encoding/json"
 	"io/ioutil"
+	"mage/typedefs"
 	"os"
 	"time"
 )
 
-type epoch int64
-
 type record struct {
 	Name      string
-	Timestamp epoch
+	Timestamp typedefs.Epoch
 }
 
 type recordStore struct {
@@ -36,14 +35,14 @@ func NewRecordStore(path string) *recordStore {
 }
 
 func (rs *recordStore) RecordTime(entry string) {
-	r := record{entry, epoch(time.Now().Unix())}
+	r := record{entry, typedefs.Epoch(time.Now().Unix())}
 	rs.records[entry] = r
 }
 
-func (rs recordStore) GetTime(entry string) epoch {
+func (rs recordStore) GetTime(entry string) typedefs.Epoch {
 	r, ok := rs.records[entry]
 	if !ok {
-		return epoch(0)
+		return typedefs.Epoch(0)
 	}
 	return r.Timestamp
 }
