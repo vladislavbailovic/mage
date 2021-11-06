@@ -248,8 +248,12 @@ func getRawMacroDefinitions(tokens []typedefs.Token) (map[string]typedefs.MacroD
 			if tokens[j].Kind == typedefs.TOKEN_MACRO_DFN_CLOSE {
 				break
 			}
-			if tokens[j].Kind != typedefs.TOKEN_WORD && tokens[j].Kind != typedefs.TOKEN_MACRO_CALL_OPEN && tokens[j].Kind != typedefs.TOKEN_MACRO_CALL_CLOSE {
-				return nil, debug.TokenError(tokens[j], fmt.Sprintf("unexpected macro content; only words and macro calls are allowed but we got %v", debug.GetTokenType(tokens[j].Kind)))
+			switch tokens[j].Kind {
+			case typedefs.TOKEN_WORD, typedefs.TOKEN_MACRO_CALL_OPEN, typedefs.TOKEN_MACRO_CALL_CLOSE:
+			default:
+				return nil, debug.TokenError(tokens[j], fmt.Sprintf(
+					"unexpected macro content; only words and macro calls are allowed but we got %v",
+					debug.GetTokenType(tokens[j].Kind)))
 			}
 			valueTokens = append(valueTokens, tokens[j])
 		}
