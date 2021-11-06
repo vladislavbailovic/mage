@@ -25,7 +25,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	tasks, errT := evaluation.GetEvaluationStack("root", dfns)
+	var rootTask string
+	if len(flag.Args()) == 0 {
+		var errF error
+		rootTask, errF = proc.GetFirstTaskName()
+		if errF != nil {
+			fmt.Println(errF)
+			os.Exit(1)
+		}
+	} else {
+		rootTask = flag.Args()[0]
+	}
+
+	tasks, errT := evaluation.GetEvaluationStack(rootTask, dfns)
 	if errT != nil {
 		fmt.Println(errT)
 		os.Exit(1)

@@ -16,25 +16,68 @@ import (
 
 type Processor struct {
 	file   string
+	source string
 	tokens []typedefs.Token
 	dfns   map[string]typedefs.TaskDefinition
 }
 
 func NewProcessor(filepath string) *Processor {
-	proc := Processor{filepath, []typedefs.Token{}, map[string]typedefs.TaskDefinition{}}
+	proc := Processor{filepath, "", []typedefs.Token{}, map[string]typedefs.TaskDefinition{}}
 	return &proc
 }
 
 func (p *Processor) GetTasks() (map[string]typedefs.TaskDefinition, error) {
-	lines, _ := shell.LoadFile(p.file)
-	tkn := tokenizing.NewTokenizer(p.file, lines)
-	tokens, _ := preprocessing.Preprocess(tkn.Tokenize())
-	dfns, err := process(tokens)
+	err := p.load()
 	if err != nil {
 		return nil, err
 	}
+
+	err = p.process()
+	if err != nil {
+		return nil, err
+	}
+
+	dfns, errP := process(p.tokens)
+	if errP != nil {
+		return nil, errP
+	}
 	p.dfns = dfns
 	return dfns, nil
+}
+
+func (p *Processor) GetFirstTaskName() (string, error) {
+	if len(p.dfns) == 0 {
+		return "", fmt.Errorf("empty task stack")
+	}
+	for i := 0; i < len(p.tokens); i++ {
+		if p.tokens[i].Kind == typedefs.TOKEN_RULE_OPEN {
+			ruleName := p.tokens[i+1].Value
+			_, ok := p.dfns[ruleName]
+			if ok {
+				return ruleName, nil
+			}
+		}
+	}
+	return "", fmt.Errorf("unable to resolve first task")
+}
+
+func (p *Processor) load() error {
+	lines, err := shell.LoadFile(p.file)
+	if err != nil {
+		return err
+	}
+	p.source = lines
+	return nil
+}
+
+func (p *Processor) process() error {
+	tkn := tokenizing.NewTokenizer(p.file, p.source)
+	tokens, err := preprocessing.Preprocess(tkn.Tokenize())
+	if err != nil {
+		return err
+	}
+	p.tokens = tokens
+	return nil
 }
 
 func process(tokens []typedefs.Token) (map[string]typedefs.TaskDefinition, error) {
