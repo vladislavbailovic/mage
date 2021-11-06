@@ -6,7 +6,6 @@ TODO:
 -----
 
 - [ ] Implement CLI runner
-- [ ] Implement initial task selection
 - [ ] Implement result reporting
 - [ ] Spaces are significant (at least in command definitions)
 
@@ -41,3 +40,4 @@ Features:
 	5. Add task content to execution stack
 - Execute stack
 - Can compile scripts
+- Selects initial task from command line, or first task in (preprocessed) source file
