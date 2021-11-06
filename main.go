@@ -18,7 +18,8 @@ func main() {
 	file := flag.String("f", FIXTURE, "File to process")
 	flag.Parse()
 
-	dfns, errD := processing.ProcessFile(*file)
+	proc := processing.NewProcessor(*file)
+	dfns, errD := proc.GetTasks()
 	if errD != nil {
 		fmt.Println(errD)
 		os.Exit(1)

@@ -1,21 +1,13 @@
 package processing
 
 import (
-	"mage/debug"
-	"mage/processing/preprocessing"
-	"mage/processing/tokenizing"
-	"mage/shell"
 	"testing"
 )
 
 func Test_Process(t *testing.T) {
-	lines, _ := shell.LoadFile("../fixtures/macro.mg")
-	tkn := tokenizing.NewTokenizer("../fixtures/macro.mg", lines)
-	rawTokens := tkn.Tokenize()
-	tokens, _ := preprocessing.Preprocess(rawTokens)
-	dfns, err := process(tokens)
+	proc := NewProcessor("../fixtures/macro.mg")
+	dfns, err := proc.GetTasks()
 	if err != nil {
-		debug.Tokens(tokens)
 		t.Log(err)
 		t.Fatalf("expected processing to succeed")
 	}
@@ -26,11 +18,8 @@ func Test_Process(t *testing.T) {
 }
 
 func Test_Process_RedefiningRulesCausesError(t *testing.T) {
-	lines, _ := shell.LoadFile("../fixtures/rule-conflict.mg")
-	tkn := tokenizing.NewTokenizer("../fixtures/rule-conflict.mg", lines)
-	rawTokens := tkn.Tokenize()
-	tokens, _ := preprocessing.Preprocess(rawTokens)
-	_, err := process(tokens)
+	proc := NewProcessor("../fixtures/rule-conflict.mg")
+	_, err := proc.GetTasks()
 	if err == nil {
 		t.Log(err)
 		t.Fatalf("expected rule name conflict")

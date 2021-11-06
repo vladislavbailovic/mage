@@ -6,7 +6,8 @@ import (
 )
 
 func Test_ExecuteStack_HappyPath(t *testing.T) {
-	dfns, _ := processing.ProcessFile("../fixtures/includes.mg")
+	proc := processing.NewProcessor("../fixtures/includes.mg")
+	dfns, _ := proc.GetTasks()
 	tasks, _ := getEvaluationStackFrom("root", dfns)
 
 	outputs, err := Execute(tasks)
@@ -21,7 +22,8 @@ func Test_ExecuteStack_HappyPath(t *testing.T) {
 }
 
 func Test_ExecuteStack_HappyPathWithCommends(t *testing.T) {
-	dfns, _ := processing.ProcessFile("../fixtures/run-with-comments.mg")
+	proc := processing.NewProcessor("../fixtures/run-with-comments.mg")
+	dfns, _ := proc.GetTasks()
 	tasks, _ := getEvaluationStackFrom("root", dfns)
 
 	outputs, err := Execute(tasks)
@@ -42,7 +44,8 @@ func Test_ExecuteStack_HappyPathWithCommends(t *testing.T) {
 }
 
 func Test_ExecuteStack_InvalidCommand(t *testing.T) {
-	dfns, _ := processing.ProcessFile("../fixtures/invalid-commands.mg")
+	proc := processing.NewProcessor("../fixtures/invalid-commands.mg")
+	dfns, _ := proc.GetTasks()
 	tasks, _ := getEvaluationStackFrom("root", dfns)
 
 	_, err := Execute(tasks)

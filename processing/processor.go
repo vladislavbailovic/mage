@@ -14,11 +14,27 @@ import (
 	"mage/typedefs"
 )
 
-func ProcessFile(filepath string) (map[string]typedefs.TaskDefinition, error) {
-	lines, _ := shell.LoadFile(filepath)
-	tkn := tokenizing.NewTokenizer(filepath, lines)
+type Processor struct {
+	file   string
+	tokens []typedefs.Token
+	dfns   map[string]typedefs.TaskDefinition
+}
+
+func NewProcessor(filepath string) *Processor {
+	proc := Processor{filepath, []typedefs.Token{}, map[string]typedefs.TaskDefinition{}}
+	return &proc
+}
+
+func (p *Processor) GetTasks() (map[string]typedefs.TaskDefinition, error) {
+	lines, _ := shell.LoadFile(p.file)
+	tkn := tokenizing.NewTokenizer(p.file, lines)
 	tokens, _ := preprocessing.Preprocess(tkn.Tokenize())
-	return process(tokens)
+	dfns, err := process(tokens)
+	if err != nil {
+		return nil, err
+	}
+	p.dfns = dfns
+	return dfns, nil
 }
 
 func process(tokens []typedefs.Token) (map[string]typedefs.TaskDefinition, error) {
