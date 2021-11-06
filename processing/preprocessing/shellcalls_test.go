@@ -14,9 +14,8 @@ func Test_PreprocessorShellcallMacros(t *testing.T) {
 	if err != nil {
 		t.Fatalf("preprocessing error: %s", err)
 	}
-	t.Log(err, tokens)
 	// debug.Tokens(tokens)
-	// if len(tokens) >= len(rawTokens) {
-	// 	t.Fatalf("expected macros to be removed from tokens, got %d", len(tokens))
-	// }
+	if len(tokens) >= len(rawTokens) {
+		t.Fatalf("expected shellcodes to be removed from tokens, got %d", len(tokens))
+	}
 }
