@@ -1,26 +1,17 @@
-package processing
+package preprocessing
 
 import (
 	"mage/debug"
+	"mage/processing/tokenizing"
 	"mage/shell"
 	"testing"
 )
 
-func Test_TokenizeIncludes(t *testing.T) {
-	lines, _ := shell.LoadFile("../fixtures/includes.mg")
-	tkn := newTokenizer("../fixtures/includes.mg", lines)
-	rawTokens := tkn.tokenize()
-	// debug.Tokens(rawTokens)
-	if len(rawTokens) <= 0 {
-		t.Fatalf("should at least have some raw tokens")
-	}
-}
-
 func Test_PreprocessorDoesIncludes(t *testing.T) {
-	filepath := "../fixtures/includes.mg"
+	filepath := "../../fixtures/includes.mg"
 	lines, _ := shell.LoadFile(filepath)
-	tkn := newTokenizer(filepath, lines)
-	proc := newPreprocessor(tkn.tokenize())
+	tkn := tokenizing.NewTokenizer(filepath, lines)
+	proc := newPreprocessor(tkn.Tokenize())
 	err := proc.doIncludes()
 	if err != nil {
 		t.Fatalf("preprocessing includes error: %s", err)
@@ -32,10 +23,10 @@ func Test_PreprocessorDoesIncludes(t *testing.T) {
 }
 
 func Test_PreprocessorAppliesIncludes(t *testing.T) {
-	filepath := "../fixtures/includes.mg"
+	filepath := "../../fixtures/includes.mg"
 	lines, _ := shell.LoadFile(filepath)
-	tkn := newTokenizer(filepath, lines)
-	proc := newPreprocessor(tkn.tokenize())
+	tkn := tokenizing.NewTokenizer(filepath, lines)
+	proc := newPreprocessor(tkn.Tokenize())
 	err := proc.doIncludes()
 	if err != nil {
 		t.Log(err)
@@ -55,10 +46,10 @@ func Test_PreprocessorAppliesIncludes(t *testing.T) {
 }
 
 func Test_RecursiveInclusionShouldErrorOut(t *testing.T) {
-	filepath := "../fixtures/recursive-inclusion.mg"
+	filepath := "../../fixtures/recursive-inclusion.mg"
 	lines, _ := shell.LoadFile(filepath)
-	tkn := newTokenizer(filepath, lines)
-	proc := newPreprocessor(tkn.tokenize())
+	tkn := tokenizing.NewTokenizer(filepath, lines)
+	proc := newPreprocessor(tkn.Tokenize())
 	err := proc.doIncludes()
 	if err == nil {
 		t.Log(err)
@@ -67,10 +58,10 @@ func Test_RecursiveInclusionShouldErrorOut(t *testing.T) {
 }
 
 func Test_MultilevelInclusionShouldWork(t *testing.T) {
-	filepath := "../fixtures/double-include-parent.mg"
+	filepath := "../../fixtures/double-include-parent.mg"
 	lines, _ := shell.LoadFile(filepath)
-	tkn := newTokenizer(filepath, lines)
-	proc := newPreprocessor(tkn.tokenize())
+	tkn := tokenizing.NewTokenizer(filepath, lines)
+	proc := newPreprocessor(tkn.Tokenize())
 	err := proc.doIncludes()
 	if err != nil {
 		t.Log(err)

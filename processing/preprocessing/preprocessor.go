@@ -1,16 +1,17 @@
-package processing
+package preprocessing
 
 // Preprocesses the list of tokens by expanding macros.
 
 import (
 	"fmt"
 	"mage/debug"
+	"mage/processing/tokenizing"
 	"mage/shell"
 	"mage/typedefs"
 	"strings"
 )
 
-func preprocess(tokens []typedefs.Token) ([]typedefs.Token, error) {
+func Preprocess(tokens []typedefs.Token) ([]typedefs.Token, error) {
 	proc := newPreprocessor(tokens)
 
 	err := proc.doIncludes()
@@ -388,6 +389,6 @@ func includeFile(filepath string, relativeToSource string) ([]typedefs.Token, er
 	if err != nil {
 		return nil, err
 	}
-	tkn := newTokenizer(relpath, lines)
-	return tkn.tokenize(), nil
+	tkn := tokenizing.NewTokenizer(relpath, lines)
+	return tkn.Tokenize(), nil
 }

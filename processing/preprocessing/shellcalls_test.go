@@ -1,15 +1,16 @@
-package processing
+package preprocessing
 
 import (
+	"mage/processing/tokenizing"
 	"mage/shell"
 	"testing"
 )
 
 func Test_PreprocessorShellcallMacros(t *testing.T) {
-	lines, _ := shell.LoadFile("../fixtures/shell-macros.mg")
-	tkn := newTokenizer("../fixtures/shell-macros.mg", lines)
-	rawTokens := tkn.tokenize()
-	tokens, err := preprocess(rawTokens)
+	lines, _ := shell.LoadFile("../../fixtures/shell-macros.mg")
+	tkn := tokenizing.NewTokenizer("../../fixtures/shell-macros.mg", lines)
+	rawTokens := tkn.Tokenize()
+	tokens, err := Preprocess(rawTokens)
 	if err != nil {
 		t.Fatalf("preprocessing error: %s", err)
 	}

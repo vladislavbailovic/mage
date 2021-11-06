@@ -1,4 +1,4 @@
-package processing
+package tokenizing
 
 import (
 	"testing"
@@ -41,10 +41,10 @@ func Test_TokenizerPosition(t *testing.T) {
 }
 
 func Test_Tokenizer(t *testing.T) {
-	lines, _ := shell.LoadFile("../fixtures/macro.mg")
-	tkn := newTokenizer("../fixtures/macro.mg", lines)
+	lines, _ := shell.LoadFile("../../fixtures/macro.mg")
+	tkn := NewTokenizer("../../fixtures/macro.mg", lines)
 	expected := 63
-	tokens := tkn.tokenize()
+	tokens := tkn.Tokenize()
 	// debug.Tokens(tokens)
 	if expected != len(tokens) {
 		t.Fatalf("expected %d tokens, but got %d", expected, len(tokens))
@@ -60,9 +60,9 @@ func Test_Tokenizer(t *testing.T) {
 }
 
 func Test_WordPositions(t *testing.T) {
-	lines, _ := shell.LoadFile("../fixtures/macro.mg")
-	tkn := newTokenizer("../fixtures/macro.mg", lines)
-	tokens := tkn.tokenize()
+	lines, _ := shell.LoadFile("../../fixtures/macro.mg")
+	tkn := NewTokenizer("../../fixtures/macro.mg", lines)
+	tokens := tkn.Tokenize()
 	expecteds := [][]int{
 		//[]int{1,1}, // "macro" gets nerfed
 		[]int{1, 8},
@@ -126,9 +126,9 @@ func Test_WordPositions(t *testing.T) {
 }
 
 func Test_TokenizerSetsProperPositions_MacroDfn(t *testing.T) {
-	lines, _ := shell.LoadFile("../fixtures/macro.mg")
-	tkn := newTokenizer("../fixtures/macro.mg", lines)
-	tkn.tokenize()
+	lines, _ := shell.LoadFile("../../fixtures/macro.mg")
+	tkn := NewTokenizer("../../fixtures/macro.mg", lines)
+	tkn.Tokenize()
 	for _, tk := range tkn.filter(typedefs.TOKEN_MACRO_DFN_OPEN) {
 		if tk.Pos.Char != 8 {
 			t.Fatalf("macro dfn should start at 7 (because keyword gets dropped), got %d", tk.Pos.Char)
@@ -144,9 +144,9 @@ func Test_TokenizerSetsProperPositions_MacroDfn(t *testing.T) {
 }
 
 func Test_TokenizerSetsProperPositions_Command(t *testing.T) {
-	lines, _ := shell.LoadFile("../fixtures/macro.mg")
-	tkn := newTokenizer("../fixtures/macro.mg", lines)
-	tkn.tokenize()
+	lines, _ := shell.LoadFile("../../fixtures/macro.mg")
+	tkn := NewTokenizer("../../fixtures/macro.mg", lines)
+	tkn.Tokenize()
 	for _, tk := range tkn.filter(typedefs.TOKEN_COMMAND_OPEN) {
 		if tk.Pos.Char != 2 {
 			t.Fatalf("command should start at 2 (after tab), got %d", tk.Pos.Char)
@@ -162,9 +162,9 @@ func Test_TokenizerSetsProperPositions_Command(t *testing.T) {
 }
 
 func Test_TokenizerSetsProperPositions_MacroCall(t *testing.T) {
-	lines, _ := shell.LoadFile("../fixtures/macro.mg")
-	tkn := newTokenizer("../fixtures/macro.mg", lines)
-	tkn.tokenize()
+	lines, _ := shell.LoadFile("../../fixtures/macro.mg")
+	tkn := NewTokenizer("../../fixtures/macro.mg", lines)
+	tkn.Tokenize()
 
 	co := tkn.filter(typedefs.TOKEN_MACRO_CALL_OPEN)
 	if co[0].Pos.Char != 14 {

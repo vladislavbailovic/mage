@@ -1,4 +1,4 @@
-package processing
+package tokenizing
 
 // Builds a list of tokens to be used further in the
 // processing pipeline.
@@ -42,7 +42,7 @@ type tokenizer struct {
 	position *tokenizerPosition
 }
 
-func newTokenizer(source string, content string) *tokenizer {
+func NewTokenizer(source string, content string) *tokenizer {
 	pos := tokenizerPosition{source, 0, 1, 1}
 	tkn := tokenizer{
 		content:  content,
@@ -64,10 +64,10 @@ func (t *tokenizer) addToken(tk typedefs.Token) {
 }
 
 func (t *tokenizer) tokenizeSubstring(substr string) []typedefs.Token {
-	subt := newTokenizer(t.position.source, substr)
+	subt := NewTokenizer(t.position.source, substr)
 	subt.position.currentLine = t.position.currentLine
 	subt.position.currentChar = t.position.currentChar
-	return subt.tokenize()
+	return subt.Tokenize()
 }
 
 func (t *tokenizer) processNewline(word string) string {
@@ -159,7 +159,7 @@ func (t *tokenizer) processIncludeCall(word string) string {
 	return ""
 }
 
-func (t *tokenizer) tokenize() []typedefs.Token {
+func (t *tokenizer) Tokenize() []typedefs.Token {
 	content := t.content + " \n"
 	word := ""
 	for t.position.cursor < len(content)-1 {
