@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mage/evaluation"
 	"mage/processing"
+	"mage/typedefs"
 	"os"
 )
 
@@ -15,31 +16,34 @@ const (
 )
 
 func main() {
+	var err error
+
 	file := flag.String("f", FIXTURE, "File to process")
 	flag.Parse()
 
+	var dfns map[string]typedefs.TaskDefinition
 	proc := processing.NewProcessor(*file)
-	dfns, errD := proc.GetTasks()
-	if errD != nil {
-		fmt.Println(errD)
+	dfns, err = proc.GetTasks()
+	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
 	var rootTask string
 	if len(flag.Args()) == 0 {
-		var errF error
-		rootTask, errF = proc.GetFirstTaskName()
-		if errF != nil {
-			fmt.Println(errF)
+		rootTask, err = proc.GetFirstTaskName()
+		if err != nil {
+			fmt.Println(err)
 			os.Exit(1)
 		}
 	} else {
 		rootTask = flag.Args()[0]
 	}
 
-	tasks, errT := evaluation.GetEvaluationStack(rootTask, dfns)
-	if errT != nil {
-		fmt.Println(errT)
+	var tasks []typedefs.Task
+	tasks, err = evaluation.GetEvaluationStack(rootTask, dfns)
+	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
