@@ -5,7 +5,6 @@ Mage - task runner in go
 TODO:
 -----
 
-- [ ] Implement shell command expansion in macro definitions
 - [ ] Implement CLI runner
 - [ ] Implement initial task selection
 - [ ] Implement result reporting
@@ -18,6 +17,7 @@ Features:
 - Has includes
 - Has macros
 - Macros are recursive _in definition_
+- Macros can call shell commands in macro definitions
 - Has tasks
 - Tasks have dependencies on other tasks or files
 - Tasks cannot be redefined
