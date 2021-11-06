@@ -3,9 +3,9 @@ package evaluation
 import (
 	"encoding/json"
 	"io/ioutil"
+	"mage/epoch"
 	"mage/typedefs"
 	"os"
-	"time"
 )
 
 type record struct {
@@ -35,7 +35,7 @@ func NewRecordStore(path string) *recordStore {
 }
 
 func (rs *recordStore) RecordTime(entry string) {
-	r := record{entry, typedefs.Epoch(time.Now().Unix())}
+	r := record{entry, epoch.Now()}
 	rs.records[entry] = r
 }
 
