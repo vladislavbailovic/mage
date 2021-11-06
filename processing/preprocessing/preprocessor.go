@@ -47,14 +47,6 @@ func newPreprocessor(tokens []typedefs.Token) *preprocessor {
 		0}
 }
 
-func (p *preprocessor) run() error {
-	err := p.doIncludes()
-	if err != nil {
-		return err
-	}
-	return p.doMacros()
-}
-
 func (p *preprocessor) doIncludes() error {
 	for depth := 0; depth < p.expansionDepth; depth++ {
 		changed := false
