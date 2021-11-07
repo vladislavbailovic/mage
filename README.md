@@ -5,8 +5,15 @@ Mage - task runner in go
 TODO:
 -----
 
-- [ ] Implement CLI runner
-- [ ] Implement result reporting
+- [ ] Implement CLI runner:
+	- [ ] Compile/exec selection
+	- [ ] Direct epoch timestamp setting
+	- [ ] Epoch timestamp setting from file
+	- [ ] Epoch timestamp setting from git branch?
+	- [ ] CLI help
+- [ ] Implement result reporting:
+	- [ ] Summary output with verbose flag
+	- [ ] Diagnostic output with very verbose flag
 - [ ] Spaces are significant (at least in command definitions)
 
 
