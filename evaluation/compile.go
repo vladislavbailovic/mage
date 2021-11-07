@@ -12,6 +12,9 @@ func Compile(tasks []typedefs.Task) string {
 }
 
 func GetCompiledStatements(tasks []typedefs.Task) []string {
+	if len(tasks) == 0 {
+		return []string{}
+	}
 	outputs := []string{
 		fmt.Sprintf("#!%s", shell.GetShellBinary()),
 		"",
