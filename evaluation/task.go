@@ -13,7 +13,7 @@ type executionItem struct {
 
 type ruleTask struct {
 	executionItem
-	records recordStore
+	records *recordStore
 }
 type fileTask struct{ executionItem }
 
@@ -23,6 +23,7 @@ func (r executionItem) GetName() string {
 func (r executionItem) GetCommands() []string {
 	return r.spec
 }
+func (r executionItem) RecordTime() {}
 
 func (t ruleTask) GetMilestone() typedefs.Epoch {
 	return t.records.getTime(t.GetName())
@@ -31,7 +32,11 @@ func (t fileTask) GetMilestone() typedefs.Epoch {
 	return typedefs.Epoch(shell.GetFileMtime(t.name))
 }
 
-func newTask(dfn typedefs.TaskDefinition, records recordStore) typedefs.Task {
+func (t ruleTask) RecordTime() {
+	t.records.recordTime(t.GetName())
+}
+
+func newTask(dfn typedefs.TaskDefinition, records *recordStore) typedefs.Task {
 	if shell.FileExists(dfn.Name) {
 		return fileTask{executionItem{dfn.Pos, dfn.Name, dfn.Commands}}
 	}

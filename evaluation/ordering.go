@@ -18,12 +18,12 @@ type Stack struct {
 	dfns    map[string]typedefs.TaskDefinition
 	root    string
 	time    typedefs.Epoch
-	records recordStore
+	records *recordStore
 }
 
 func NewStack(start string, dfns map[string]typedefs.TaskDefinition) *Stack {
 	records := newRecordStore("")
-	return &Stack{dfns, start, typedefs.Epoch(0), *records}
+	return &Stack{dfns, start, typedefs.Epoch(0), records}
 }
 
 func (s *Stack) SetEpoch(t typedefs.Epoch) {
@@ -34,7 +34,7 @@ func (s *Stack) SetRoot(r string) {
 	s.root = r
 }
 
-func (s *Stack) SetRecords(rs recordStore) {
+func (s *Stack) SetRecords(rs *recordStore) {
 	s.records = rs
 }
 

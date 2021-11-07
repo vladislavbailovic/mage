@@ -10,6 +10,7 @@ const (
 
 type Task interface {
 	GetMilestone() Epoch
+	RecordTime()
 	GetName() string
 	GetCommands() []string
 }
