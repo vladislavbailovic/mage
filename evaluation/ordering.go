@@ -22,7 +22,7 @@ type Stack struct {
 }
 
 func NewStack(start string, dfns map[string]typedefs.TaskDefinition) *Stack {
-	records := newRecordStore("")
+	records := NewRecordStore("")
 	return &Stack{dfns, start, typedefs.Epoch(0), records}
 }
 

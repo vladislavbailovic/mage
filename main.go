@@ -11,7 +11,7 @@ import (
 
 const (
 	FIXTURE      string = "fixtures/macro.mg"
-	RECORD_STORE string = "tmp/test.json"
+	RECORD_STORE string = ".Magefile"
 	ROOT_TASK    string = "root"
 )
 
@@ -40,8 +40,11 @@ func main() {
 		rootTask = flag.Args()[0]
 	}
 
-	var tasks []typedefs.Task
 	stack := evaluation.NewStack(rootTask, dfns)
+	records := evaluation.NewRecordStore(RECORD_STORE)
+	stack.SetRecords(records)
+
+	var tasks []typedefs.Task
 	tasks, err = stack.Evaluate()
 	if err != nil {
 		fmt.Println(err)

@@ -5,7 +5,7 @@ import (
 )
 
 func Test_RecordStore(t *testing.T) {
-	store := newRecordStore("../tmp/test.json")
+	store := NewRecordStore("../tmp/test.json")
 	store.recordTime("test")
 
 	tm := store.getTime("test")
@@ -19,7 +19,7 @@ func Test_RecordStore(t *testing.T) {
 		t.Fatalf("saving should be a success")
 	}
 
-	store2 := newRecordStore("../tmp/test.json")
+	store2 := NewRecordStore("../tmp/test.json")
 	if store2.getTime("test") != store.getTime("test") {
 		t.Fatal("expected stored time to match live time")
 	}

@@ -3,6 +3,7 @@ package evaluation
 import (
 	"encoding/json"
 	"io/ioutil"
+	"mage/debug"
 	"mage/epoch"
 	"mage/typedefs"
 	"os"
@@ -13,7 +14,7 @@ type recordStore struct {
 	records map[string]typedefs.Record
 }
 
-func newRecordStore(path string) *recordStore {
+func NewRecordStore(path string) *recordStore {
 	file, err := os.Open(path)
 	if err != nil {
 		return &recordStore{path, map[string]typedefs.Record{}}
@@ -43,6 +44,7 @@ func (rs recordStore) getTime(entry string) typedefs.Epoch {
 }
 
 func (rs recordStore) save() error {
+	debug.Records(rs.records)
 	content, err := json.MarshalIndent(rs.records, "", " ")
 	if err != nil {
 		return err

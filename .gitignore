@@ -1,3 +1,4 @@
+.Magefile
 mage
 tmp
 *.out
