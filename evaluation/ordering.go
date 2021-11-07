@@ -2,7 +2,6 @@ package evaluation
 
 import (
 	"fmt"
-	"mage/epoch"
 	"mage/typedefs"
 	"strings"
 )
@@ -22,7 +21,7 @@ type Stack struct {
 }
 
 func NewStack(start string, dfns map[string]typedefs.TaskDefinition) *Stack {
-	return &Stack{dfns, start, epoch.Now()}
+	return &Stack{dfns, start, typedefs.Epoch(0)}
 }
 
 func (s *Stack) SetEpoch(t typedefs.Epoch) {
@@ -44,7 +43,10 @@ func (s Stack) evaluateSubstack(start string, stack []typedefs.Task) ([]typedefs
 		return nil, fmt.Errorf("unable to resolve descending root task: [%s]", start)
 	}
 
-	item := typedefs.NewTask(root)
+	item := newTask(root)
+	if !s.withinEpoch(item) {
+		return stack, nil
+	}
 
 	var err error
 	for i := len(root.Dependencies) - 1; i >= 0; i-- {
@@ -58,4 +60,8 @@ func (s Stack) evaluateSubstack(start string, stack []typedefs.Task) ([]typedefs
 	stack = append(stack, item)
 
 	return stack, nil
+}
+
+func (s Stack) withinEpoch(what typedefs.Milestone) bool {
+	return what.GetMilestone() >= s.time
 }
