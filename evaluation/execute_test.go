@@ -8,7 +8,7 @@ import (
 func Test_ExecuteStack_HappyPath(t *testing.T) {
 	proc := processing.NewProcessor("../fixtures/includes.mg")
 	dfns, _ := proc.GetTasks()
-	tasks, _ := getEvaluationStackFrom("root", dfns)
+	tasks, _ := GetEvaluationStack("root", dfns)
 
 	outputs, err := Execute(tasks)
 	if err != nil {
@@ -24,7 +24,7 @@ func Test_ExecuteStack_HappyPath(t *testing.T) {
 func Test_ExecuteStack_HappyPathWithCommends(t *testing.T) {
 	proc := processing.NewProcessor("../fixtures/run-with-comments.mg")
 	dfns, _ := proc.GetTasks()
-	tasks, _ := getEvaluationStackFrom("root", dfns)
+	tasks, _ := GetEvaluationStack("root", dfns)
 
 	outputs, err := Execute(tasks)
 	if err != nil {
@@ -46,7 +46,7 @@ func Test_ExecuteStack_HappyPathWithCommends(t *testing.T) {
 func Test_ExecuteStack_InvalidCommand(t *testing.T) {
 	proc := processing.NewProcessor("../fixtures/invalid-commands.mg")
 	dfns, _ := proc.GetTasks()
-	tasks, _ := getEvaluationStackFrom("root", dfns)
+	tasks, _ := GetEvaluationStack("root", dfns)
 
 	_, err := Execute(tasks)
 	if err == nil {

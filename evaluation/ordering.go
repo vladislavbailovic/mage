@@ -2,6 +2,7 @@ package evaluation
 
 import (
 	"fmt"
+	"mage/epoch"
 	"mage/typedefs"
 	"strings"
 )
@@ -9,32 +10,51 @@ import (
 // Accepts a set of task definitions and start point, and
 // orders them into an execution stack
 
-// @TODO pick entry point task
 func GetEvaluationStack(start string, dfns map[string]typedefs.TaskDefinition) ([]typedefs.Task, error) {
-	return getEvaluationStackFrom(start, dfns)
+	stack := NewStack(start, dfns)
+	return stack.Evaluate()
 }
 
-func getEvaluationStackFrom(start string, dfns map[string]typedefs.TaskDefinition) ([]typedefs.Task, error) {
+type Stack struct {
+	dfns map[string]typedefs.TaskDefinition
+	root string
+	time typedefs.Epoch
+}
+
+func NewStack(start string, dfns map[string]typedefs.TaskDefinition) *Stack {
+	return &Stack{dfns, start, epoch.Now()}
+}
+
+func (s *Stack) SetEpoch(t typedefs.Epoch) {
+	s.time = t
+}
+
+func (s *Stack) SetRoot(r string) {
+	s.root = r
+}
+
+func (s Stack) Evaluate() ([]typedefs.Task, error) {
 	stack := []typedefs.Task{}
-	return getEvaluationSubstackFrom(start, dfns, stack)
+	return s.evaluateSubstack(s.root, stack)
 }
 
-func getEvaluationSubstackFrom(start string, dfns map[string]typedefs.TaskDefinition, stack []typedefs.Task) ([]typedefs.Task, error) {
-	root, ok := dfns[start]
+func (s Stack) evaluateSubstack(start string, stack []typedefs.Task) ([]typedefs.Task, error) {
+	root, ok := s.dfns[start]
 	if !ok {
 		return nil, fmt.Errorf("unable to resolve descending root task: [%s]", start)
 	}
 
+	item := typedefs.NewTask(root)
+
 	var err error
 	for i := len(root.Dependencies) - 1; i >= 0; i-- {
 		dependency := strings.TrimSpace(root.Dependencies[i]) // @TODO: lexer issue, fix
-		stack, err = getEvaluationSubstackFrom(dependency, dfns, stack)
+		stack, err = s.evaluateSubstack(dependency, stack)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	item := typedefs.NewTask(root)
 	stack = append(stack, item)
 
 	return stack, nil

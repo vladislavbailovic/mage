@@ -9,7 +9,7 @@ import (
 func Test_GetCompiledStatements(t *testing.T) {
 	proc := processing.NewProcessor("../fixtures/includes.mg")
 	dfns, _ := proc.GetTasks()
-	tasks, _ := getEvaluationStackFrom("root", dfns)
+	tasks, _ := GetEvaluationStack("root", dfns)
 
 	outputs := GetCompiledStatements(tasks)
 
@@ -22,7 +22,7 @@ func Test_GetCompiledStatements(t *testing.T) {
 func Test_Compile(t *testing.T) {
 	proc := processing.NewProcessor("../fixtures/includes.mg")
 	dfns, _ := proc.GetTasks()
-	tasks, _ := getEvaluationStackFrom("root", dfns)
+	tasks, _ := GetEvaluationStack("root", dfns)
 
 	statements := GetCompiledStatements(tasks)
 	out := Compile(tasks)

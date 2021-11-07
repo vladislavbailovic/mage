@@ -8,7 +8,7 @@ import (
 func Test_Ordering_StackGettingFailsForInvalidRootTask(t *testing.T) {
 	proc := processing.NewProcessor("../fixtures/simple.mg")
 	dfns, _ := proc.GetTasks()
-	_, err := getEvaluationStackFrom("non-existent-task", dfns)
+	_, err := GetEvaluationStack("non-existent-task", dfns)
 	if err == nil {
 		t.Fatalf("stack getting should fail for invalid first task")
 	}
@@ -23,7 +23,7 @@ func Test_Ordering(t *testing.T) {
 		t.Fatalf("expected processing to be a success")
 	}
 
-	tasks, err := getEvaluationStackFrom("root", dfns)
+	tasks, err := GetEvaluationStack("root", dfns)
 	expected := []string{
 		"parser.go",
 		"dependency1",
