@@ -7,3 +7,9 @@ const (
 	TOKEN_COMMAND_OPEN
 	TOKEN_COMMAND_CLOSE
 )
+
+type Task interface {
+	GetMilestone() Epoch
+	GetName() string
+	GetCommands() []string
+}

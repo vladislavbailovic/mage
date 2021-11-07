@@ -8,26 +8,21 @@ import (
 	"os"
 )
 
-type record struct {
-	name      string
-	timestamp typedefs.Epoch
-}
-
 type recordStore struct {
 	path    string
-	records map[string]record
+	records map[string]typedefs.Record
 }
 
 func newRecordStore(path string) *recordStore {
 	file, err := os.Open(path)
 	if err != nil {
-		return &recordStore{path, map[string]record{}}
+		return &recordStore{path, map[string]typedefs.Record{}}
 	}
 	defer file.Close()
 
 	bytes, _ := ioutil.ReadAll(file)
 
-	var records map[string]record
+	var records map[string]typedefs.Record
 	json.Unmarshal(bytes, &records)
 
 	store := recordStore{path, records}
@@ -35,7 +30,7 @@ func newRecordStore(path string) *recordStore {
 }
 
 func (rs *recordStore) recordTime(entry string) {
-	r := record{entry, epoch.Now()}
+	r := typedefs.Record{entry, epoch.Now()}
 	rs.records[entry] = r
 }
 
@@ -44,7 +39,7 @@ func (rs recordStore) getTime(entry string) typedefs.Epoch {
 	if !ok {
 		return typedefs.Epoch(0)
 	}
-	return r.timestamp
+	return r.Timestamp
 }
 
 func (rs recordStore) save() error {
