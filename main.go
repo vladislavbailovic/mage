@@ -41,11 +41,13 @@ func main() {
 	}
 
 	var tasks []typedefs.Task
-	tasks, err = evaluation.GetEvaluationStack(rootTask, dfns)
+	stack := evaluation.NewStack(rootTask, dfns)
+	tasks, err = stack.Evaluate()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
 	fmt.Println(evaluation.Compile(tasks))
+	stack.Record()
 }

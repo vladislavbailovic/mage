@@ -9,8 +9,8 @@ import (
 )
 
 type record struct {
-	Name      string
-	Timestamp typedefs.Epoch
+	name      string
+	timestamp typedefs.Epoch
 }
 
 type recordStore struct {
@@ -18,7 +18,7 @@ type recordStore struct {
 	records map[string]record
 }
 
-func NewRecordStore(path string) *recordStore {
+func newRecordStore(path string) *recordStore {
 	file, err := os.Open(path)
 	if err != nil {
 		return &recordStore{path, map[string]record{}}
@@ -34,20 +34,20 @@ func NewRecordStore(path string) *recordStore {
 	return &store
 }
 
-func (rs *recordStore) RecordTime(entry string) {
+func (rs *recordStore) recordTime(entry string) {
 	r := record{entry, epoch.Now()}
 	rs.records[entry] = r
 }
 
-func (rs recordStore) GetTime(entry string) typedefs.Epoch {
+func (rs recordStore) getTime(entry string) typedefs.Epoch {
 	r, ok := rs.records[entry]
 	if !ok {
 		return typedefs.Epoch(0)
 	}
-	return r.Timestamp
+	return r.timestamp
 }
 
-func (rs recordStore) Save() error {
+func (rs recordStore) save() error {
 	content, err := json.MarshalIndent(rs.records, "", " ")
 	if err != nil {
 		return err
