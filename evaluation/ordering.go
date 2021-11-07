@@ -15,15 +15,17 @@ func GetEvaluationStack(start string, dfns map[string]typedefs.TaskDefinition) (
 }
 
 type Stack struct {
-	dfns    map[string]typedefs.TaskDefinition
-	root    string
-	time    typedefs.Epoch
-	records *recordStore
+	evaluated bool
+	dfns      map[string]typedefs.TaskDefinition
+	root      string
+	time      typedefs.Epoch
+	records   *recordStore
+	tasks     []typedefs.Task
 }
 
 func NewStack(start string, dfns map[string]typedefs.TaskDefinition) *Stack {
 	records := NewRecordStore("")
-	return &Stack{dfns, start, typedefs.Epoch(0), records}
+	return &Stack{false, dfns, start, typedefs.Epoch(-1), records, []typedefs.Task{}}
 }
 
 func (s *Stack) SetEpoch(t typedefs.Epoch) {
@@ -36,15 +38,37 @@ func (s *Stack) SetRoot(r string) {
 
 func (s *Stack) SetRecords(rs *recordStore) {
 	s.records = rs
+	ts := s.records.getTime(s.root)
+	if ts > 0 {
+		s.time = ts
+	}
 }
 
-func (s Stack) Evaluate() ([]typedefs.Task, error) {
+func (s *Stack) Evaluate() ([]typedefs.Task, error) {
+	if s.evaluated {
+		return s.tasks, nil
+	}
+
 	stack := []typedefs.Task{}
-	return s.evaluateSubstack(s.root, stack)
+	s.evaluated = true
+	tasks, err := s.evaluateSubstack(s.root, stack)
+	if err != nil {
+		return nil, err
+	}
+
+	s.tasks = tasks
+	return tasks, nil
 }
 
-func (s Stack) Record() {
-	s.records.save()
+func (s Stack) Record() error {
+	if !s.evaluated {
+		return fmt.Errorf("unable to record times before evaluating tasks stack")
+	}
+	for _, task := range s.tasks {
+		s.records.recordTime(task.GetName())
+	}
+	err := s.records.save()
+	return err
 }
 
 func (s Stack) evaluateSubstack(start string, stack []typedefs.Task) ([]typedefs.Task, error) {
@@ -73,5 +97,5 @@ func (s Stack) evaluateSubstack(start string, stack []typedefs.Task) ([]typedefs
 }
 
 func (s Stack) withinEpoch(what typedefs.Milestone) bool {
-	return what.GetMilestone() >= s.time
+	return what.GetMilestone() > s.time
 }

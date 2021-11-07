@@ -15,6 +15,6 @@ func Tasks(tasks []typedefs.Task) {
 
 func Records(records map[string]typedefs.Record) {
 	for _, rec := range records {
-		fmt.Println("[%s]: %d\n", rec.Name, rec.Timestamp)
+		fmt.Printf("[%s]: %d\n", rec.Name, rec.Timestamp)
 	}
 }

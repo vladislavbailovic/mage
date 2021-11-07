@@ -16,7 +16,6 @@ func Execute(tasks []typedefs.Task) ([]string, error) {
 				return nil, fmt.Errorf("error executing command [%s] for task [%s]: %v", cmd, tsk.GetName(), err)
 			}
 			outputs = append(outputs, out)
-			tsk.RecordTime()
 		}
 	}
 	return outputs, nil

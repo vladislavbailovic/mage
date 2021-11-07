@@ -3,7 +3,6 @@ package evaluation
 import (
 	"encoding/json"
 	"io/ioutil"
-	"mage/debug"
 	"mage/epoch"
 	"mage/typedefs"
 	"os"
@@ -44,7 +43,6 @@ func (rs recordStore) getTime(entry string) typedefs.Epoch {
 }
 
 func (rs recordStore) save() error {
-	debug.Records(rs.records)
 	content, err := json.MarshalIndent(rs.records, "", " ")
 	if err != nil {
 		return err
