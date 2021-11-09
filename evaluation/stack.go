@@ -40,7 +40,7 @@ func (s *Stack) SetRecords(rs *recordStore) {
 	s.records = rs
 	ts := s.records.getTime(s.root)
 	if ts > 0 {
-		s.time = ts
+		s.SetEpoch(ts)
 	}
 }
 
